@@ -1,0 +1,26 @@
+# Node modules
+node_modules/
+
+# Build directories
+/dist/
+/.out/
+
+# Logs
+*.log
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+*.env
+
+# Temporary files
+*.swp
+*.bak
+*.tmp
+
+# Other generated files
+*.min.js
+*.bundle.js

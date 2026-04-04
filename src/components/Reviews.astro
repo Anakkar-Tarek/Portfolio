@@ -1,0 +1,97 @@
+---
+const templates = [
+  {
+    brand: "Dior",
+    description: "French luxury fashion house known for couture, beauty, and accessories.",
+    image: "/images/templates/1.jpg",
+    alt: "Dior social media template preview"
+  },
+  {
+    brand: "TUMI",
+    description: "Premium travel and luggage brand focused on modern mobility.",
+    image: "/images/templates/2.png",
+    alt: "TUMI social media template preview"
+  },
+  {
+    brand: "Moet Hennessy",
+    description: "Luxury wines and spirits group behind high-end celebration brands.",
+    image: "/images/templates/3.png",
+    alt: "Moet Hennessy social media template preview"
+  },
+  {
+    brand: "Retail Brand",
+    description: "Product-focused retail business built around lifestyle merchandising.",
+    image: "/images/templates/4.png",
+    alt: "Retail brand template preview"
+  },
+  {
+    brand: "Beauty Brand",
+    description: "Beauty and skincare label centered on premium self-care products.",
+    image: "/images/templates/5.png",
+    alt: "Beauty brand template preview"
+  },
+  {
+    brand: "Lifestyle Brand",
+    description: "Lifestyle-driven brand mixing culture, content, and everyday inspiration.",
+    image: "/images/templates/6.jpg",
+    alt: "Lifestyle brand template preview"
+  },
+  {
+    brand: "Hospitality",
+    description: "Hospitality business focused on guest experience, stays, and service.",
+    image: "/images/templates/7.png",
+    alt: "Hospitality brand template preview"
+  }
+];
+---
+
+<section id="reviews" class="templates-section">
+  <div class="orb orb-c reviews-orb"></div>
+
+  <div class="container">
+    <div class="section-label">Testimonials</div>
+    <h2 class="section-title">What Clients <em>Say</em></h2>
+
+    <div class="templates-intro">
+      <p>
+        A curated selection of personalized creative directions shaped through strategy, storytelling, and brand-focused execution.
+        Drag through the collection to explore the kind of visual work behind the results clients talk about.
+      </p>
+    </div>
+
+    <div class="templates-showcase" id="templatesShowcase">
+      <div class="templates-fade templates-fade-left" aria-hidden="true"></div>
+      <div class="templates-fade templates-fade-right" aria-hidden="true"></div>
+
+      <div class="templates-viewport" id="templatesViewport">
+        <div class="templates-track" id="templatesTrack">
+          {templates.map((template, index) => (
+            <article
+              class={`template-card ${index === 0 ? "is-active" : ""}`}
+              data-template-card
+              aria-label={`${template.brand} template`}
+            >
+              <div class="template-card-shell">
+                <div class="template-card-glow" aria-hidden="true"></div>
+
+                <div class="template-media">
+                  <img
+                    src={template.image}
+                    alt={template.alt}
+                    loading="lazy"
+                    draggable="false"
+                  />
+                </div>
+
+                <div class="template-meta">
+                  <h3 class="template-brand">{template.brand}</h3>
+                  <p class="template-description">{template.description}</p>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
