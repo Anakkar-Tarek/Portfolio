@@ -1,6 +1,6 @@
 ---
 ---
-<section id="transformation">
+<section id="transformation" class="lux-section lux-section--feature">
   <div class="orb orb-b transform-orb"></div>
   <div class="container">
 
@@ -13,8 +13,8 @@
       <div class="ba-glow-halo"></div>
 
       <div class="ba-labels" id="baLabels">
-        <span class="ba-label-before">Jan 2025 - Before</span>
-        <span class="ba-label-after">Feb-Mar 2025 - After</span>
+        <span class="ba-label-before">Jan 1 - Jan 31</span>
+        <span class="ba-label-after">Feb 9 - Mar 10</span>
       </div>
 
       <div class="ba-slider" id="baSlider">
@@ -22,17 +22,21 @@
 
         <img
           src="/images/IG1.jpeg"
-          alt="After - Feb-Mar 2025: 349,391 views, 35,070 accounts reached"
+          alt="After - Feb 9 to Mar 10: 349,391 views, 35,070 accounts reached"
           class="ba-img ba-img-after"
           id="baImgAfter"
+          width="1170"
+          height="1580"
           draggable="false"
         />
 
         <img
           src="/images/IG2.jpeg"
-          alt="Before - Jan 2025: 25,342 views, 597 accounts reached"
+          alt="Before - Jan 1 to Jan 31: 25,342 views, 597 accounts reached"
           class="ba-img ba-img-before"
           id="baImgBefore"
+          width="1170"
+          height="1580"
           draggable="false"
         />
 
@@ -63,7 +67,7 @@
 
     <div class="ba-compare-bar" id="baCompareBar">
       <div class="ba-compare-col ba-col-before">
-        <span class="ba-c-period">Jan 2025</span>
+        <span class="ba-c-period">Jan 1 - Jan 31</span>
         <div class="ba-c-metrics">
           <div class="ba-c-metric">
             <span class="ba-c-val" data-count="25342" data-format="comma">25,342</span>
@@ -77,15 +81,21 @@
         </div>
       </div>
 
-      <div class="ba-compare-arrow" aria-hidden="true">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-          <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-        <span class="ba-growth-badge">13.8x growth</span>
+      <div class="ba-live-panel" aria-live="polite">
+        <span class="ba-live-kicker" id="baLiveKicker">Split reveal</span>
+        <strong class="ba-growth-badge" id="baGrowthBadge">7.4x views lift</strong>
+        <span class="ba-live-sub" id="baLiveSub">29.9x reach lift</span>
+        <div class="ba-reveal-meter" aria-hidden="true">
+          <span class="ba-meter-fill"></span>
+        </div>
+        <div class="ba-meter-labels" aria-hidden="true">
+          <span>Jan</span>
+          <span>Feb-Mar</span>
+        </div>
       </div>
 
       <div class="ba-compare-col ba-col-after">
-        <span class="ba-c-period">Feb-Mar 2025</span>
+        <span class="ba-c-period">Feb 9 - Mar 10</span>
         <div class="ba-c-metrics">
           <div class="ba-c-metric">
             <span class="ba-c-val" data-count="349391" data-format="comma">349,391</span>

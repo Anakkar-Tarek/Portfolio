@@ -36,6 +36,8 @@ const fmt = (n, f) => f === "comma" ? Math.round(n).toLocaleString("en-US") : St
   const ctx = canvas.getContext("2d", { alpha: true });
   if (!ctx) return;
 
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
   const pointer = {
     x: window.innerWidth * 0.5,
     y: window.innerHeight * 0.3,
@@ -46,9 +48,10 @@ const fmt = (n, f) => f === "comma" ? Math.round(n).toLocaleString("en-US") : St
   };
 
   const PALETTES = [
-    "rgba(162,123,91,",
     "rgba(192,154,120,",
     "rgba(212,165,116,",
+    "rgba(232,200,154,",
+    "rgba(245,224,184,",
     "rgba(224,215,200,",
     "rgba(145,186,198,",
   ];
@@ -56,10 +59,15 @@ const fmt = (n, f) => f === "comma" ? Math.round(n).toLocaleString("en-US") : St
   let particles = [];
   let rafId = 0;
 
+  function syncCanvasOpacity() {
+    canvas.style.opacity = reducedMotion.matches ? "0.22" : "0.92";
+  }
+
   function makeParticle() {
+    const reduced = reducedMotion.matches;
     const col = PALETTES[Math.floor(Math.random() * PALETTES.length)];
-    const driftX = (Math.random() - 0.5) * 0.3;
-    const driftY = -(Math.random() * 0.42 + 0.1);
+    const driftX = (Math.random() - 0.5) * (reduced ? 0.08 : 0.3);
+    const driftY = -(Math.random() * (reduced ? 0.12 : 0.42) + (reduced ? 0.03 : 0.1));
 
     return {
       x: Math.random() * canvas.width,
@@ -68,14 +76,14 @@ const fmt = (n, f) => f === "comma" ? Math.round(n).toLocaleString("en-US") : St
       vy: driftY,
       baseVx: driftX,
       baseVy: driftY,
-      r: Math.random() * 2.4 + 0.65,
-      opacity: Math.random() * 0.24 + 0.16,
+      r: Math.random() * (reduced ? 1.6 : 2.4) + 0.65,
+      opacity: Math.random() * (reduced ? 0.12 : 0.24) + (reduced ? 0.08 : 0.16),
       col,
       twinkle: Math.random() * Math.PI * 2,
-      twinkleFreq: 0.012 + Math.random() * 0.02,
+      twinkleFreq: (reduced ? 0.004 : 0.01) + Math.random() * (reduced ? 0.006 : 0.016),
       orbit: Math.random() * Math.PI * 2,
-      orbitSpeed: 0.0045 + Math.random() * 0.008,
-      orbitRadius: Math.random() * 0.28 + 0.06,
+      orbitSpeed: (reduced ? 0.0015 : 0.0035) + Math.random() * (reduced ? 0.002 : 0.006),
+      orbitRadius: Math.random() * (reduced ? 0.12 : 0.24) + 0.05,
     };
   }
 
@@ -83,7 +91,9 @@ const fmt = (n, f) => f === "comma" ? Math.round(n).toLocaleString("en-US") : St
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const count = Math.max(120, Math.min(200, Math.floor(window.innerWidth / 8)));
+    const count = reducedMotion.matches
+      ? Math.max(28, Math.min(58, Math.floor(window.innerWidth / 24)))
+      : Math.max(120, Math.min(210, Math.floor(window.innerWidth / 8)));
     particles = Array.from({ length: count }, makeParticle);
   }
 
@@ -116,7 +126,9 @@ const fmt = (n, f) => f === "comma" ? Math.round(n).toLocaleString("en-US") : St
     pointer.velocityX *= 0.9;
     pointer.velocityY *= 0.9;
 
-    const influenceRadius = Math.min(300, Math.max(180, canvas.width * 0.18));
+    const influenceRadius = reducedMotion.matches
+      ? 0
+      : Math.min(320, Math.max(190, canvas.width * 0.18));
 
     particles.forEach((p) => {
       p.twinkle += p.twinkleFreq;
@@ -157,11 +169,16 @@ const fmt = (n, f) => f === "comma" ? Math.round(n).toLocaleString("en-US") : St
     rafId = window.requestAnimationFrame(animate);
   }
 
+  syncCanvasOpacity();
   resize();
   animate();
 
   window.addEventListener("resize", resize, { passive: true });
   window.addEventListener("pointermove", updatePointer, { passive: true });
+  reducedMotion.addEventListener("change", () => {
+    syncCanvasOpacity();
+    resize();
+  });
   window.addEventListener("beforeunload", () => window.cancelAnimationFrame(rafId), { passive: true });
 })();
 
@@ -241,6 +258,12 @@ const fmt = (n, f) => f === "comma" ? Math.round(n).toLocaleString("en-US") : St
   const spotlight = document.getElementById("ambientSpotlight");
   if (!spotlight) return;
 
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  if (reducedMotion.matches) {
+    spotlight.style.opacity = "0.16";
+    return;
+  }
+
   if (!window.matchMedia("(pointer: fine)").matches) {
     spotlight.style.display = "none";
     return;
@@ -255,11 +278,11 @@ const fmt = (n, f) => f === "comma" ? Math.round(n).toLocaleString("en-US") : St
   }, { passive: true });
 
   document.addEventListener("mouseenter", () => {
-    gsap.to(spotlight, { opacity: 1, duration: 0.35, ease: "power2.out" });
+    gsap.to(spotlight, { opacity: 0.36, duration: 0.35, ease: "power2.out" });
   });
 
   document.addEventListener("mouseleave", () => {
-    gsap.to(spotlight, { opacity: 0, duration: 0.25, ease: "power2.out" });
+    gsap.to(spotlight, { opacity: 0.18, duration: 0.25, ease: "power2.out" });
   });
 })();
 
@@ -325,8 +348,30 @@ navToggle?.addEventListener("click", () => {
   navToggle.setAttribute("aria-expanded", String(open));
   navMobile.setAttribute("aria-hidden",   String(!open));
 });
-["mob-about","mob-services","mob-help","mob-reviews","mob-contact"]
+["mob-about","mob-services","mob-help","mob-results","mob-reviews","mob-contact"]
   .forEach(id => $(id + ":not(#" + id + ")") || document.getElementById(id)?.addEventListener("click", closeMobile));
+
+(function initTextShineTracking() {
+  const targets = [
+    ...$$(".nav-logo").map((el) => ({ el, x: "--shine-x", y: "--shine-y" })),
+    ...$$(".section-title").map((el) => ({ el, x: "--title-shine-x", y: "--title-shine-y" })),
+  ];
+
+  targets.forEach(({ el, x, y }) => {
+    el.addEventListener("pointermove", (event) => {
+      const rect = el.getBoundingClientRect();
+      const px = ((event.clientX - rect.left) / rect.width) * 100;
+      const py = ((event.clientY - rect.top) / rect.height) * 100;
+      el.style.setProperty(x, `${Math.max(0, Math.min(100, px)).toFixed(1)}%`);
+      el.style.setProperty(y, `${Math.max(0, Math.min(100, py)).toFixed(1)}%`);
+    }, { passive: true });
+
+    el.addEventListener("pointerleave", () => {
+      el.style.setProperty(x, "50%");
+      el.style.setProperty(y, "50%");
+    }, { passive: true });
+  });
+})();
 
 /* ============================================================
    5. HERO GSAP REVEAL
@@ -439,6 +484,8 @@ $$(".service-card[data-tilt]").forEach(card => {
   const compareBar = $("#baCompareBar");
   const compareCols = compareBar ? Array.from(compareBar.querySelectorAll(".ba-compare-col")) : [];
   const growthBadge = compareBar?.querySelector(".ba-growth-badge");
+  const liveKicker = $("#baLiveKicker");
+  const liveSub = $("#baLiveSub");
   if (!slider || !overlay || !beforeImg || !afterImg) return;
 
   const metricEls = compareBar ? Array.from(compareBar.querySelectorAll(".ba-c-val")) : [];
@@ -456,11 +503,10 @@ $$(".service-card[data-tilt]").forEach(card => {
     side: index < 2 ? "before" : "after",
   }));
 
-  const growthMax = (() => {
-    const raw = growthBadge?.dataset.growthMax || growthBadge?.textContent || "13.8";
-    const parsed = parseFloat(String(raw).replace(/[^0-9.]/g, ""));
-    return Number.isFinite(parsed) ? parsed : 13.8;
-  })();
+  const beforeViews = metrics[0]?.full || fallbackMetricValues[0];
+  const beforeReach = metrics[1]?.full || fallbackMetricValues[1];
+  const afterViews = metrics[2]?.full || fallbackMetricValues[2];
+  const afterReach = metrics[3]?.full || fallbackMetricValues[3];
 
   let currentPos = 50;
   let isDragging = false;
@@ -477,53 +523,91 @@ $$(".service-card[data-tilt]").forEach(card => {
     return ((clientX - rect.left) / rect.width) * 100;
   }
 
-  function updateLabelStyles(progress) {
+  function syncRevealVars(beforeShare) {
+    const afterShare = 1 - beforeShare;
+    const beforeValue = beforeShare.toFixed(3);
+    const afterValue = afterShare.toFixed(3);
+
+    scene?.style.setProperty("--ba-before-share", beforeValue);
+    scene?.style.setProperty("--ba-after-share", afterValue);
+    compareBar?.style.setProperty("--ba-before-share", beforeValue);
+    compareBar?.style.setProperty("--ba-after-share", afterValue);
+    compareBar?.style.setProperty("--ba-after-percent", `${(afterShare * 100).toFixed(1)}%`);
+  }
+
+  function updateLabelStyles(beforeShare) {
+    const afterShare = 1 - beforeShare;
+
     if (beforeLabel) {
-      const strength = 0.44 + progress * 0.56;
+      const strength = 0.42 + beforeShare * 0.58;
       beforeLabel.style.opacity = strength.toFixed(3);
-      beforeLabel.style.transform = `translateY(0) scale(${(0.96 + progress * 0.08).toFixed(3)})`;
-      beforeLabel.style.filter = `brightness(${(0.86 + progress * 0.22).toFixed(3)})`;
+      beforeLabel.style.transform = `translateY(0) scale(${(0.97 + beforeShare * 0.06).toFixed(3)})`;
+      beforeLabel.style.filter = `brightness(${(0.86 + beforeShare * 0.24).toFixed(3)})`;
     }
 
     if (afterLabel) {
-      const strength = 0.44 + (1 - progress) * 0.56;
+      const strength = 0.42 + afterShare * 0.58;
       afterLabel.style.opacity = strength.toFixed(3);
-      afterLabel.style.transform = `translateY(0) scale(${(0.96 + (1 - progress) * 0.08).toFixed(3)})`;
-      afterLabel.style.filter = `brightness(${(0.86 + (1 - progress) * 0.22).toFixed(3)})`;
+      afterLabel.style.transform = `translateY(0) scale(${(0.97 + afterShare * 0.06).toFixed(3)})`;
+      afterLabel.style.filter = `brightness(${(0.86 + afterShare * 0.24).toFixed(3)})`;
     }
+
+    beforeImg.style.filter = `saturate(${(0.88 + beforeShare * 0.18).toFixed(3)}) brightness(${(0.84 + beforeShare * 0.16).toFixed(3)})`;
+    afterImg.style.filter = `saturate(${(0.9 + afterShare * 0.18).toFixed(3)}) brightness(${(0.86 + afterShare * 0.16).toFixed(3)})`;
   }
 
-  function updateCompareStyles(progress) {
-    const beforeStrength = 0.56 + progress * 0.44;
-    const afterStrength = 0.56 + (1 - progress) * 0.44;
+  function updateCompareStyles(beforeShare) {
+    const afterShare = 1 - beforeShare;
+    const beforeStrength = 0.58 + beforeShare * 0.42;
+    const afterStrength = 0.58 + afterShare * 0.42;
 
     if (compareCols[0]) {
       compareCols[0].style.opacity = beforeStrength.toFixed(3);
-      compareCols[0].style.transform = `translateY(${((1 - progress) * 4).toFixed(2)}px) scale(${(0.985 + progress * 0.03).toFixed(3)})`;
+      compareCols[0].style.transform = `translateY(${(afterShare * 4).toFixed(2)}px) scale(${(0.985 + beforeShare * 0.025).toFixed(3)})`;
+      compareCols[0].classList.toggle("is-active", beforeShare > afterShare);
     }
 
     if (compareCols[1]) {
       compareCols[1].style.opacity = afterStrength.toFixed(3);
-      compareCols[1].style.transform = `translateY(${(progress * 4).toFixed(2)}px) scale(${(0.985 + (1 - progress) * 0.03).toFixed(3)})`;
+      compareCols[1].style.transform = `translateY(${(beforeShare * 4).toFixed(2)}px) scale(${(0.985 + afterShare * 0.025).toFixed(3)})`;
+      compareCols[1].classList.toggle("is-active", afterShare >= beforeShare);
+    }
+  }
+
+  function updateLiveBadge(beforeShare) {
+    const afterShare = 1 - beforeShare;
+    const currentViews = beforeViews + (afterViews - beforeViews) * afterShare;
+    const currentReach = beforeReach + (afterReach - beforeReach) * afterShare;
+    const viewsLift = beforeViews ? currentViews / beforeViews : 1;
+    const reachLift = beforeReach ? currentReach / beforeReach : 1;
+
+    if (liveKicker) {
+      liveKicker.textContent =
+        afterShare > 0.66 ? "Feb-Mar result in focus" :
+        beforeShare > 0.66 ? "Jan baseline in focus" :
+        "Split reveal";
+    }
+
+    if (growthBadge) {
+      growthBadge.textContent = `${viewsLift.toFixed(1)}x views lift`;
+    }
+
+    if (liveSub) {
+      liveSub.textContent = `${reachLift.toFixed(1)}x reach lift | ${Math.round(afterShare * 100)}% result reveal`;
     }
   }
 
   function renderMetrics(pct) {
-    const progress = clamp((pct - 2) / 96, 0, 1);
+    const beforeShare = clamp((pct - 2) / 96, 0, 1);
 
     metrics.forEach((metric) => {
-      const weight = metric.side === "before" ? progress : 1 - progress;
-      const value = metric.full * weight;
-      metric.el.textContent = fmt(value, metric.format);
+      metric.el.textContent = fmt(metric.full, metric.format);
     });
 
-    if (growthBadge) {
-      const growth = 1 + (growthMax - 1) * (1 - progress);
-      growthBadge.textContent = `${growth.toFixed(1)}x growth`;
-    }
-
-    updateLabelStyles(progress);
-    updateCompareStyles(progress);
+    syncRevealVars(beforeShare);
+    updateLabelStyles(beforeShare);
+    updateCompareStyles(beforeShare);
+    updateLiveBadge(beforeShare);
   }
 
   function setPos(pct, instant = false) {
@@ -677,8 +761,8 @@ $$(".service-card[data-tilt]").forEach(card => {
   const yTo = gsap.quickTo(btn, "y", { duration: 0.5, ease: "power3" });
   btn.addEventListener("mousemove", e => {
     const r = btn.getBoundingClientRect();
-    xTo((e.clientX - r.left - r.width  / 2) * 0.35);
-    yTo((e.clientY - r.top  - r.height / 2) * 0.35);
+    xTo((e.clientX - r.left - r.width  / 2) * 0.18);
+    yTo((e.clientY - r.top  - r.height / 2) * 0.18);
   });
   btn.addEventListener("mouseleave", () => { xTo(0); yTo(0); });
 })();
