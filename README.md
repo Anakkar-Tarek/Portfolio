@@ -1,6 +1,6 @@
 # Fadoua Badih — Portfolio (Astro + Tailwind + GSAP)
 
-Migrated from vanilla HTML/CSS/JS to **Astro 4 + Tailwind CSS + GSAP 3**.
+Migrated from vanilla HTML/CSS/JS to **Astro 5 + Tailwind CSS + GSAP 3**.
 
 ## Quick Start
 
@@ -17,8 +17,8 @@ npm run preview   # Preview production build
 fadoua-portfolio/
 ├── public/
 │   └── images/
-│       ├── IG1.jpeg     ← After analytics screenshot
-│       └── IG2.jpeg     ← Before analytics screenshot
+│       ├── IG1.webp     ← After analytics screenshot
+│       └── IG2.webp     ← Before analytics screenshot
 ├── src/
 │   ├── components/
 │   │   ├── Preloader.astro

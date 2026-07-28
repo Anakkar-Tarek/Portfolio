@@ -5,29 +5,57 @@ export interface Props {
 }
 const {
   title = "Fadoua Badih — Digital Marketing & Brand Strategist",
-  description = "Digital Marketing & Brand Strategist helping brands build strong digital presence through strategy, storytelling, and visual content."
+  description = "Digital marketing and brand strategy for stronger online presence through strategy, content production, and brand storytelling."
 } = Astro.props;
+const SITE_URL = "https://fadouabadih.com/";
+const OG_IMAGE_URL = `${SITE_URL}og-image.png`;
 ---
 <!doctype html>
-<html lang="en">
+<html lang="en" class="is-loading">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{title}</title>
   <meta name="description" content={description} />
-  <meta property="og:title"       content={title} />
+  <link rel="canonical" href={SITE_URL} />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
-  <meta property="og:type"        content="website" />
+  <meta property="og:image" content={OG_IMAGE_URL} />
+  <meta property="og:url" content={SITE_URL} />
+  <meta property="og:locale" content="en_US" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={OG_IMAGE_URL} />
+  <meta name="theme-color" content="#050a10" />
+  <style is:global>
+    html {
+      scrollbar-gutter: stable;
+    }
+
+    html.is-loading,
+    html.is-loading body {
+      overflow: hidden;
+      scrollbar-width: none;
+    }
+
+    html.is-loading::-webkit-scrollbar,
+    html.is-loading body::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+      display: none;
+    }
+  </style>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&family=Inter:ital,opsz,wght@0,14..32,300..900;1,14..32,300..900&family=Montserrat:wght@400;500;600;700;800&family=Syne:wght@400;500;600;700;800&display=swap"
     rel="stylesheet"
   />
 </head>
 <body>
   <canvas id="particleCanvas" aria-hidden="true"></canvas>
-  <div id="ambientSpotlight" class="ambient-spotlight" aria-hidden="true"></div>
   <slot />
 </body>
 </html>

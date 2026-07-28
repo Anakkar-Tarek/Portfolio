@@ -4,8 +4,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans:      ['"DM Sans"', 'sans-serif'],
-        display:   ['"Syne"', 'sans-serif'],
+        sans:      ['"Inter"', 'sans-serif'],
+        display:   ['"Montserrat"', 'sans-serif'],
+        brand:     ['"Syne"', 'sans-serif'],
         serif:     ['"DM Serif Display"', 'serif'],
         garamond:  ['"Cormorant Garamond"', 'serif'],
       },

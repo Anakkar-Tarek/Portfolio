@@ -21,7 +21,7 @@
         <div class="ba-spotlight" id="baSpotlight"></div>
 
         <img
-          src="/images/IG1.jpeg"
+          src="/images/IG1.webp"
           alt="After - Feb 9 to Mar 10: 349,391 views, 35,070 accounts reached"
           class="ba-img ba-img-after"
           id="baImgAfter"
@@ -31,7 +31,7 @@
         />
 
         <img
-          src="/images/IG2.jpeg"
+          src="/images/IG2.webp"
           alt="Before - Jan 1 to Jan 31: 25,342 views, 597 accounts reached"
           class="ba-img ba-img-before"
           id="baImgBefore"
@@ -56,12 +56,17 @@
           role="slider"
           aria-label="Drag to compare before and after results"
           aria-valuenow="50"
-          aria-valuemin="2"
-          aria-valuemax="98"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuetext="50% before image visible"
+          aria-describedby="baSliderInstructions"
           tabindex="0"
         ></div>
       </div>
 
+      <p class="sr-only" id="baSliderInstructions">
+        Use Left and Right arrow keys to adjust by 3 percent, Page Up and Page Down by 10 percent, Home for the start, and End for the end.
+      </p>
       <p class="ba-hint-text" aria-hidden="true">&larr; drag to compare &rarr;</p>
     </div>
 
@@ -78,19 +83,6 @@
             <span class="ba-c-val" data-count="597">597</span>
             <span class="ba-c-name">Accounts Reached</span>
           </div>
-        </div>
-      </div>
-
-      <div class="ba-live-panel" aria-live="polite">
-        <span class="ba-live-kicker" id="baLiveKicker">Split reveal</span>
-        <strong class="ba-growth-badge" id="baGrowthBadge">7.4x views lift</strong>
-        <span class="ba-live-sub" id="baLiveSub">29.9x reach lift</span>
-        <div class="ba-reveal-meter" aria-hidden="true">
-          <span class="ba-meter-fill"></span>
-        </div>
-        <div class="ba-meter-labels" aria-hidden="true">
-          <span>Jan</span>
-          <span>Feb-Mar</span>
         </div>
       </div>
 

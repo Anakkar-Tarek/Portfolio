@@ -8,7 +8,7 @@
  * 4.  Navbar
  * 5.  Hero GSAP reveal
  * 6.  Scroll reveals (ScrollTrigger)
- * 7.  Section title underlines
+ * 7.  Section title underlines + section label motion
  * 8.  Services 3D tilt + spotlight
  * 9.  Before/After slider — FIXED reveal + GSAP cinematic
  * 10. Magnetic CTA button
@@ -24,6 +24,12 @@ gsap.registerPlugin(ScrollTrigger);
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 const fmt = (n, f) => f === "comma" ? Math.round(n).toLocaleString("en-US") : String(Math.round(n));
+const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+const finePointerQuery = window.matchMedia("(pointer: fine)");
+
+if ("scrollRestoration" in window.history) {
+  window.history.scrollRestoration = "manual";
+}
 
 /* ============================================================
    1. AMBIENT PARTICLE CANVAS
@@ -58,9 +64,10 @@ const fmt = (n, f) => f === "comma" ? Math.round(n).toLocaleString("en-US") : St
 
   let particles = [];
   let rafId = 0;
+  let isRunning = false;
 
   function syncCanvasOpacity() {
-    canvas.style.opacity = reducedMotion.matches ? "0.22" : "0.92";
+    canvas.style.opacity = reducedMotion.matches ? "0.19" : "0.78";
   }
 
   function makeParticle() {
@@ -92,8 +99,8 @@ const fmt = (n, f) => f === "comma" ? Math.round(n).toLocaleString("en-US") : St
     canvas.height = window.innerHeight;
 
     const count = reducedMotion.matches
-      ? Math.max(28, Math.min(58, Math.floor(window.innerWidth / 24)))
-      : Math.max(120, Math.min(210, Math.floor(window.innerWidth / 8)));
+      ? Math.max(18, Math.min(37, Math.floor(window.innerWidth / 38)))
+      : Math.max(77, Math.min(134, Math.floor(window.innerWidth / 13)));
     particles = Array.from({ length: count }, makeParticle);
   }
 
@@ -118,44 +125,48 @@ const fmt = (n, f) => f === "comma" ? Math.round(n).toLocaleString("en-US") : St
     ctx.fill();
   }
 
-  function animate() {
+  function drawFrame(advance = true) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    pointer.x += (pointer.targetX - pointer.x) * 0.11;
-    pointer.y += (pointer.targetY - pointer.y) * 0.11;
-    pointer.velocityX *= 0.9;
-    pointer.velocityY *= 0.9;
+    if (advance) {
+      pointer.x += (pointer.targetX - pointer.x) * 0.11;
+      pointer.y += (pointer.targetY - pointer.y) * 0.11;
+      pointer.velocityX *= 0.9;
+      pointer.velocityY *= 0.9;
+    }
 
-    const influenceRadius = reducedMotion.matches
-      ? 0
-      : Math.min(320, Math.max(190, canvas.width * 0.18));
+    const influenceRadius = advance && !reducedMotion.matches
+      ? Math.min(165, Math.max(96, canvas.width * 0.09))
+      : 0;
 
     particles.forEach((p) => {
-      p.twinkle += p.twinkleFreq;
-      p.orbit += p.orbitSpeed;
+      if (advance) {
+        p.twinkle += p.twinkleFreq;
+        p.orbit += p.orbitSpeed;
 
-      const dx = p.x - pointer.x;
-      const dy = p.y - pointer.y;
-      const distance = Math.hypot(dx, dy) || 1;
+        const dx = p.x - pointer.targetX;
+        const dy = p.y - pointer.targetY;
+        const distance = Math.hypot(dx, dy) || 1;
 
-      if (distance < influenceRadius) {
-        const force = (1 - distance / influenceRadius) * 0.08;
-        const motionBoost = Math.min(1.35, (Math.abs(pointer.velocityX) + Math.abs(pointer.velocityY)) * 0.02);
-        p.vx += (dx / distance) * force;
-        p.vy += (dy / distance) * force;
-        p.vx += pointer.velocityX * 0.0025 * motionBoost;
-        p.vy += pointer.velocityY * 0.0025 * motionBoost;
+        if (distance < influenceRadius) {
+          const force = (1 - distance / influenceRadius) * 0.055;
+          const motionBoost = Math.min(1, (Math.abs(pointer.velocityX) + Math.abs(pointer.velocityY)) * 0.015);
+          p.vx += (dx / distance) * force;
+          p.vy += (dy / distance) * force;
+          p.vx += pointer.velocityX * 0.0015 * motionBoost;
+          p.vy += pointer.velocityY * 0.0015 * motionBoost;
+        }
+
+        const orbitX = Math.cos(p.orbit) * p.orbitRadius;
+        const orbitY = Math.sin(p.orbit) * p.orbitRadius * 0.5;
+
+        p.vx += (p.baseVx + orbitX - p.vx) * 0.035;
+        p.vy += (p.baseVy + orbitY - p.vy) * 0.035;
+
+        p.x += p.vx;
+        p.y += p.vy;
+        wrapParticle(p);
       }
-
-      const orbitX = Math.cos(p.orbit) * p.orbitRadius;
-      const orbitY = Math.sin(p.orbit) * p.orbitRadius * 0.5;
-
-      p.vx += (p.baseVx + orbitX - p.vx) * 0.035;
-      p.vy += (p.baseVy + orbitY - p.vy) * 0.035;
-
-      p.x += p.vx;
-      p.y += p.vy;
-      wrapParticle(p);
 
       const alpha = p.opacity * (0.78 + 0.5 * Math.sin(p.twinkle));
       drawGlow(p.x, p.y, p.r, alpha, p.col);
@@ -165,125 +176,59 @@ const fmt = (n, f) => f === "comma" ? Math.round(n).toLocaleString("en-US") : St
       ctx.fillStyle = p.col + alpha.toFixed(3) + ")";
       ctx.fill();
     });
+  }
 
+  function stopAnimation() {
+    if (rafId) window.cancelAnimationFrame(rafId);
+    rafId = 0;
+    isRunning = false;
+  }
+
+  function renderStaticFrame() {
+    stopAnimation();
+    drawFrame(false);
+  }
+
+  function animate() {
+    if (!isRunning || document.hidden || reducedMotion.matches) {
+      rafId = 0;
+      isRunning = false;
+      return;
+    }
+
+    drawFrame(true);
     rafId = window.requestAnimationFrame(animate);
+  }
+
+  function startAnimation() {
+    if (isRunning || document.hidden || reducedMotion.matches) return;
+    isRunning = true;
+    animate();
   }
 
   syncCanvasOpacity();
   resize();
-  animate();
+  if (reducedMotion.matches) renderStaticFrame();
+  else startAnimation();
 
-  window.addEventListener("resize", resize, { passive: true });
+  window.addEventListener("resize", () => {
+    resize();
+    if (reducedMotion.matches) renderStaticFrame();
+    else startAnimation();
+  }, { passive: true });
   window.addEventListener("pointermove", updatePointer, { passive: true });
   reducedMotion.addEventListener("change", () => {
     syncCanvasOpacity();
     resize();
+    if (reducedMotion.matches) renderStaticFrame();
+    else startAnimation();
   });
-  window.addEventListener("beforeunload", () => window.cancelAnimationFrame(rafId), { passive: true });
-})();
-
-/* ============================================================
-   2. CUSTOM CURSOR
-   Dot tracks exactly; ring follows with GSAP quickTo lag.
-   Reacts to hover over interactive elements and slider.
-   ============================================================ */
-(function initCursor() {
-  const dot  = document.getElementById("cursorDot");
-  const ring = document.getElementById("cursorRing");
-  if (!dot || !ring) return;
-
-  /* Touch devices — hide cursor elements */
-  if (!window.matchMedia("(pointer: fine)").matches) {
-    dot.style.display  = "none";
-    ring.style.display = "none";
-    return;
-  }
-
-  /* quickTo for the lagging ring */
-  const ringXTo = gsap.quickTo(ring, "x", { duration: 0.55, ease: "power3" });
-  const ringYTo = gsap.quickTo(ring, "y", { duration: 0.55, ease: "power3" });
-
-  let mouseX = -100, mouseY = -100;
-
-  document.addEventListener("mousemove", e => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-    /* Dot snaps instantly via transform */
-    dot.style.transform  = `translate(calc(${mouseX}px - 50%), calc(${mouseY}px - 50%))`;
-    ringXTo(mouseX);
-    ringYTo(mouseY);
-  }, { passive: true });
-
-  /* Hover states */
-  const hoverTargets = "a, button, [role='slider'], .service-card, .reviews-arrow, .reviews-dot, .nav-cta, .btn, .contact-link, .template-card, #templatesViewport";
-  const sliderTarget = "#baSlider, #baDragOverlay";
-
-  $$("*").forEach(() => {}); // warm up querySelectorAll
-
-  document.addEventListener("mouseover", e => {
-    const el = e.target;
-    if (el.closest("#baSlider") || el.closest("#baDragOverlay")) {
-      ring.classList.remove("hovering");
-      ring.classList.add("on-slider");
-    } else if (el.closest(hoverTargets)) {
-      ring.classList.remove("on-slider");
-      ring.classList.add("hovering");
-    }
-  }, { passive: true });
-
-  document.addEventListener("mouseout", e => {
-    const to = e.relatedTarget;
-    if (!to || (!to.closest(hoverTargets) && !to.closest("#baSlider"))) {
-      ring.classList.remove("hovering", "on-slider");
-    }
-  }, { passive: true });
-
-  document.addEventListener("mousedown", () => ring.classList.add("clicking"),   { passive: true });
-  document.addEventListener("mouseup",   () => ring.classList.remove("clicking"), { passive: true });
-
-  /* Hide when leaving window */
-  document.addEventListener("mouseleave", () => {
-    gsap.to([dot, ring], { opacity: 0, duration: 0.2 });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stopAnimation();
+    else if (reducedMotion.matches) renderStaticFrame();
+    else startAnimation();
   });
-  document.addEventListener("mouseenter", () => {
-    gsap.to([dot, ring], { opacity: 1, duration: 0.2 });
-  });
-})();
-
-/* ============================================================
-   2B. AMBIENT SPOTLIGHT
-   Soft radial glow follows the pointer across the page background.
-   ============================================================ */
-(function initAmbientSpotlight() {
-  const spotlight = document.getElementById("ambientSpotlight");
-  if (!spotlight) return;
-
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  if (reducedMotion.matches) {
-    spotlight.style.opacity = "0.16";
-    return;
-  }
-
-  if (!window.matchMedia("(pointer: fine)").matches) {
-    spotlight.style.display = "none";
-    return;
-  }
-
-  const xTo = gsap.quickTo(spotlight, "--spot-x", { duration: 0.6, ease: "power3.out" });
-  const yTo = gsap.quickTo(spotlight, "--spot-y", { duration: 0.6, ease: "power3.out" });
-
-  document.addEventListener("mousemove", (e) => {
-    xTo(`${e.clientX}px`);
-    yTo(`${e.clientY}px`);
-  }, { passive: true });
-
-  document.addEventListener("mouseenter", () => {
-    gsap.to(spotlight, { opacity: 0.36, duration: 0.35, ease: "power2.out" });
-  });
-
-  document.addEventListener("mouseleave", () => {
-    gsap.to(spotlight, { opacity: 0.18, duration: 0.25, ease: "power2.out" });
-  });
+  window.addEventListener("beforeunload", stopAnimation, { passive: true });
 })();
 
 /* ============================================================
@@ -293,16 +238,45 @@ const fmt = (n, f) => f === "comma" ? Math.round(n).toLocaleString("en-US") : St
   const preloader  = $("#preloader");
   const bar        = $(".preloader-bar");
   const counterEls = $$(".counter-val");
-  if (!preloader) return;
+  const PRELOADER_DURATION = 2500;
+  const EXIT_DURATION = 1050;
+  const FAST_PRELOADER_DURATION = 300;
+  const VISITED_KEY = "fb_visited";
 
-  const ease = t => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
+  function getVisitedFlag() {
+    try {
+      return window.sessionStorage.getItem(VISITED_KEY) === "1";
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function setVisitedFlag() {
+    try {
+      window.sessionStorage.setItem(VISITED_KEY, "1");
+    } catch (_) {}
+  }
+
+  document.documentElement.classList.add("is-loading");
+  if (!preloader) {
+    document.documentElement.classList.remove("is-loading");
+    return;
+  }
+
+  const useFastPath = motionQuery.matches || getVisitedFlag();
+  const preloaderInner = preloader.querySelector(".preloader-inner");
+
+  if (useFastPath) {
+    preloader.style.transitionDuration = `${FAST_PRELOADER_DURATION}ms`;
+    if (preloaderInner) preloaderInner.style.transitionDuration = `${FAST_PRELOADER_DURATION}ms`;
+  }
 
   const animCounter = (el, dur) => new Promise(res => {
     const target = +el.dataset.target;
     const t0 = performance.now();
     (function tick(now) {
       const p = Math.min((now - t0) / dur, 1);
-      el.textContent = Math.round(ease(p) * target);
+      el.textContent = Math.round(p * target);
       p < 1 ? requestAnimationFrame(tick) : (el.textContent = target, res());
     })(t0);
   });
@@ -311,17 +285,43 @@ const fmt = (n, f) => f === "comma" ? Math.round(n).toLocaleString("en-US") : St
     const t0 = performance.now();
     (function tick(now) {
       const p = Math.min((now - t0) / dur, 1);
-      bar.style.width = ease(p) * 100 + "%";
+      bar.style.width = p * 100 + "%";
       p < 1 ? requestAnimationFrame(tick) : res();
     })(t0);
   });
 
+  function setCountersToTarget() {
+    counterEls.forEach(el => {
+      el.textContent = el.dataset.target || el.textContent;
+    });
+    if (bar) bar.style.width = "100%";
+  }
+
+  function exitPreloader(duration) {
+    setVisitedFlag();
+    preloader.classList.add("is-exiting");
+    document.documentElement.classList.remove("is-loading");
+    document.documentElement.classList.add("is-scrollbar-revealing");
+    initHeroReveal();
+    window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+      ScrollTrigger.refresh();
+      window.dispatchEvent(new CustomEvent("fb:preloader-ready"));
+    }));
+    setTimeout(() => {
+      preloader.classList.add("hidden");
+      document.documentElement.classList.remove("is-scrollbar-revealing");
+    }, duration);
+  }
+
   async function run() {
-    await new Promise(r => setTimeout(r, 500));
-    await Promise.all([...counterEls.map(el => animCounter(el, 1600)), animBar(1600)]);
-    await new Promise(r => setTimeout(r, 400));
-    preloader.classList.add("hidden");
-    setTimeout(initHeroReveal, 300);
+    if (useFastPath) {
+      setCountersToTarget();
+      exitPreloader(FAST_PRELOADER_DURATION);
+      return;
+    }
+
+    await Promise.all([...counterEls.map(el => animCounter(el, PRELOADER_DURATION)), animBar(PRELOADER_DURATION)]);
+    exitPreloader(EXIT_DURATION);
   }
   run();
 })();
@@ -349,26 +349,149 @@ navToggle?.addEventListener("click", () => {
   navMobile.setAttribute("aria-hidden",   String(!open));
 });
 ["mob-about","mob-services","mob-help","mob-results","mob-reviews","mob-contact"]
-  .forEach(id => $(id + ":not(#" + id + ")") || document.getElementById(id)?.addEventListener("click", closeMobile));
+  .forEach(id => document.getElementById(id)?.addEventListener("click", closeMobile));
+
+(function initAnchorScroll() {
+  const hashLinks = $$('a[href^="#"]');
+  if (!hashLinks.length) return;
+  let pendingHash = window.location.hash || "";
+  let scrollToken = 0;
+
+  function targetForSection(section) {
+    return section.classList.contains("hero")
+      ? section
+      : section.querySelector(".section-title") || section;
+  }
+
+  function navOffset() {
+    return Math.ceil(navbar?.getBoundingClientRect().height || 0);
+  }
+
+  function anchorGap() {
+    return Math.round(Math.min(56, Math.max(28, window.innerHeight * 0.045)));
+  }
+
+  function isPageLocked() {
+    return document.documentElement.classList.contains("is-loading");
+  }
+
+  function targetYForSection(section) {
+    const target = targetForSection(section);
+    return Math.max(0, target.getBoundingClientRect().top + window.scrollY - navOffset() - anchorGap());
+  }
+
+  function applyScrollCorrection(section, token) {
+    if (token !== scrollToken) return;
+    const correctedY = targetYForSection(section);
+    if (Math.abs(window.scrollY - correctedY) > 2) {
+      window.scrollTo({
+        top: correctedY,
+        behavior: motionQuery.matches ? "auto" : "smooth",
+      });
+    }
+    ScrollTrigger.update();
+  }
+
+  function correctScroll(section, token) {
+    const run = () => applyScrollCorrection(section, token);
+    [520, 1100, 1800, 2800, 4200].forEach((delay) => window.setTimeout(run, delay));
+
+    if ("onscrollend" in window) {
+      window.addEventListener("scrollend", () => {
+        run();
+        window.setTimeout(run, 900);
+      }, { once: true });
+    }
+  }
+
+  function scrollToHash(hash, updateUrl = true, force = false) {
+    if (!hash || hash === "#") return false;
+    const section = document.getElementById(hash.slice(1));
+    if (!section) return false;
+    if (!force && isPageLocked()) {
+      pendingHash = hash;
+      if (updateUrl && window.history?.pushState) {
+        window.history.pushState(null, "", hash);
+      }
+      return true;
+    }
+
+    ScrollTrigger.refresh();
+    const token = ++scrollToken;
+    const y = targetYForSection(section);
+
+    window.scrollTo({
+      top: y,
+      behavior: motionQuery.matches ? "auto" : "smooth",
+    });
+
+    if (!motionQuery.matches) {
+      correctScroll(section, token);
+    }
+
+    if (updateUrl && window.history?.pushState) {
+      window.history.pushState(null, "", hash);
+    }
+
+    return true;
+  }
+
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+    const link = target instanceof Element ? target.closest('a[href^="#"]') : null;
+    if (!link) return;
+
+    const hash = link.getAttribute("href");
+    if (!hash || hash === "#") return;
+
+    if (scrollToHash(hash)) {
+      event.preventDefault();
+      closeMobile();
+    }
+  });
+
+  window.addEventListener("fb:preloader-ready", () => {
+    if (pendingHash) {
+      const hash = pendingHash;
+      pendingHash = "";
+      window.requestAnimationFrame(() => scrollToHash(hash, false, true));
+    } else if (!window.location.hash) {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    }
+  });
+
+  window.addEventListener("hashchange", () => {
+    scrollToHash(window.location.hash, false);
+  });
+})();
 
 (function initTextShineTracking() {
   const targets = [
     ...$$(".nav-logo").map((el) => ({ el, x: "--shine-x", y: "--shine-y" })),
     ...$$(".section-title").map((el) => ({ el, x: "--title-shine-x", y: "--title-shine-y" })),
+    ...$$(".section-title em").map((el) => ({ el, x: "--em-shine-x", y: "--em-shine-y", activeClass: "is-shining" })),
   ];
 
-  targets.forEach(({ el, x, y }) => {
-    el.addEventListener("pointermove", (event) => {
+  targets.forEach(({ el, x, y, activeClass }) => {
+    function syncShinePosition(event) {
       const rect = el.getBoundingClientRect();
       const px = ((event.clientX - rect.left) / rect.width) * 100;
       const py = ((event.clientY - rect.top) / rect.height) * 100;
       el.style.setProperty(x, `${Math.max(0, Math.min(100, px)).toFixed(1)}%`);
       el.style.setProperty(y, `${Math.max(0, Math.min(100, py)).toFixed(1)}%`);
+    }
+
+    el.addEventListener("pointerenter", (event) => {
+      syncShinePosition(event);
+      if (activeClass) el.classList.add(activeClass);
     }, { passive: true });
+
+    el.addEventListener("pointermove", syncShinePosition, { passive: true });
 
     el.addEventListener("pointerleave", () => {
       el.style.setProperty(x, "50%");
       el.style.setProperty(y, "50%");
+      if (activeClass) el.classList.remove(activeClass);
     }, { passive: true });
   });
 })();
@@ -389,13 +512,23 @@ function initHeroReveal() {
    6. SCROLL REVEALS — ScrollTrigger
    ============================================================ */
 function batchReveal(selector, from = {}, to = {}, opts = {}) {
-  ScrollTrigger.batch(selector, {
-    onEnter: batch => gsap.fromTo(
+  const elements = $$(selector);
+  if (!elements.length) return;
+
+  gsap.set(elements, {
+    autoAlpha: 0,
+    y: 24,
+    willChange: "transform, opacity",
+    ...from,
+  });
+
+  ScrollTrigger.batch(elements, {
+    onEnter: batch => gsap.to(
       batch,
-      { autoAlpha: 0, y: 28, ...from },
       {
         autoAlpha: 1,
         y: 0,
+        x: 0,
         duration: 0.82,
         ease: "expo.out",
         stagger: 0.08,
@@ -405,12 +538,149 @@ function batchReveal(selector, from = {}, to = {}, opts = {}) {
       }
     ),
     once: true,
-    start: "top 86%",
+    start: "top 94%",
     ...opts,
   });
 }
 
-gsap.set("#about .section-label, #about .section-title, #about .stat-item, #about .about-body p", { willChange: "transform, opacity" });
+function setupSectionLabelMotion() {
+  const labels = $$(".section-label");
+  if (!labels.length) return;
+
+  const labelData = new WeakMap();
+
+  function splitLabel(label) {
+    if (labelData.has(label)) return labelData.get(label);
+
+    const text = label.textContent.trim();
+    const textWrap = document.createElement("span");
+    textWrap.className = "section-label-text";
+    textWrap.setAttribute("aria-hidden", "true");
+
+    label.textContent = "";
+    label.setAttribute("aria-label", text);
+
+    Array.from(text).forEach(char => {
+      const charEl = document.createElement("span");
+      const isSpace = char === " ";
+      charEl.className = isSpace ? "section-label-char section-label-space" : "section-label-char";
+      charEl.textContent = isSpace ? "\u00a0" : char;
+      textWrap.append(charEl);
+    });
+
+    label.append(textWrap);
+
+    const data = {
+      chars: Array.from(textWrap.querySelectorAll(".section-label-char")),
+      label,
+    };
+    labelData.set(label, data);
+    return data;
+  }
+
+  function playLoad(label) {
+    const data = splitLabel(label);
+
+    if (motionQuery.matches) {
+      gsap.set(data.chars, { autoAlpha: 1, clearProps: "transform,filter" });
+      return;
+    }
+
+    gsap.killTweensOf(data.chars);
+    label.classList.add("is-label-live");
+
+    gsap.timeline({
+      defaults: { ease: "expo.out" },
+      onComplete: () => {
+        label.classList.remove("is-label-live");
+        gsap.set(data.chars, { clearProps: "transform,opacity,visibility,filter,color,willChange" });
+      },
+    })
+      .set(data.chars, {
+        autoAlpha: 0,
+        filter: "blur(5px)",
+        rotateX: i => (i % 2 ? -74 : 74),
+        rotateZ: i => (i % 2 ? 5 : -5),
+        transformPerspective: 700,
+        willChange: "transform, opacity, filter",
+        x: i => ((i % 3) - 1) * 4,
+        y: i => (i % 2 ? 14 : -12),
+      })
+      .to(data.chars, {
+        autoAlpha: 1,
+        color: "#fff0c7",
+        duration: 0.72,
+        filter: "blur(0px)",
+        rotateX: 0,
+        rotateZ: 0,
+        stagger: { each: 0.024, from: "center" },
+        x: 0,
+        y: 0,
+      }, 0)
+      .to(data.chars, {
+        color: "inherit",
+        duration: 0.36,
+        stagger: { each: 0.014, from: "edges" },
+      }, 0.42);
+  }
+
+  function playHover(label) {
+    const data = splitLabel(label);
+    if (motionQuery.matches) return;
+
+    gsap.killTweensOf(data.chars);
+    label.classList.add("is-title-hovered");
+
+    gsap.timeline({
+      defaults: { ease: "power3.out" },
+      onComplete: () => gsap.set(data.chars, { clearProps: "transform,filter,color,willChange" }),
+    })
+      .to(data.chars, {
+        color: "#fff3d9",
+        duration: 0.18,
+        filter: "brightness(1.28)",
+        rotateZ: i => (i % 2 ? -7 : 7),
+        stagger: { each: 0.016, from: "random" },
+        willChange: "transform, filter",
+        x: i => Math.sin(i * 1.7) * 3,
+        y: i => (i % 2 ? 5 : -6),
+      })
+      .to(data.chars, {
+        color: "inherit",
+        duration: 0.62,
+        ease: "elastic.out(1, 0.48)",
+        filter: "brightness(1)",
+        rotateZ: 0,
+        stagger: { each: 0.012, from: "center" },
+        x: 0,
+        y: 0,
+      });
+  }
+
+  labels.forEach(label => {
+    splitLabel(label);
+
+    ScrollTrigger.create({
+      trigger: label.closest("section") || label,
+      start: "top 86%",
+      once: true,
+      onEnter: () => gsap.delayedCall(0.12, () => playLoad(label)),
+    });
+  });
+
+  $$(".section-title").forEach(title => {
+    const label = title.closest("section")?.querySelector(".section-label");
+    if (!label) return;
+
+    title.addEventListener("pointerenter", () => playHover(label), { passive: true });
+    title.addEventListener("pointerleave", () => label.classList.remove("is-title-hovered"), { passive: true });
+    title.addEventListener("focusin", () => playHover(label));
+    title.addEventListener("focusout", () => label.classList.remove("is-title-hovered"));
+  });
+}
+
+setupSectionLabelMotion();
+
 batchReveal("#about .section-label, #about .section-title, #about .stat-item, #about .about-body p");
 batchReveal("#services .section-label, #services .section-title, #services .services-intro");
 batchReveal("#help .section-label, #help .section-title, #help .help-intro");
@@ -419,11 +689,30 @@ batchReveal("#contact .section-label, #contact .section-title, #contact .contact
 batchReveal("#transformation .section-label, #transformation .section-title");
 batchReveal(".transform-body p");
 
-gsap.fromTo(".service-card",
-  { opacity: 0, y: 40, scale: 0.97 },
-  { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "expo.out", stagger: 0.09,
-    scrollTrigger: { trigger: "#servicesGrid", start: "top 82%", once: true } }
-);
+const serviceCards = $$(".service-card");
+if (serviceCards.length) {
+  gsap.set(serviceCards, { autoAlpha: 0, y: 28, scale: 0.985, willChange: "transform, opacity" });
+  ScrollTrigger.create({
+    trigger: "#servicesGrid",
+    start: "top 92%",
+    once: true,
+    onEnter: () => {
+      serviceCards.forEach((card, index) => {
+        window.setTimeout(() => card.classList.add("is-loaded"), index * 90);
+      });
+
+      gsap.to(serviceCards, {
+        autoAlpha: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.72,
+        ease: "expo.out",
+        stagger: 0.09,
+        clearProps: "transform,opacity,visibility,willChange",
+      });
+    },
+  });
+}
 
 gsap.fromTo(".step",
   { opacity: 0, x: -30 },
@@ -438,7 +727,7 @@ gsap.fromTo(".contact-form-panel",
 );
 
 /* ============================================================
-   7. SECTION TITLE UNDERLINES
+   7. SECTION TITLE UNDERLINES + LABEL MOTION
    ============================================================ */
 $$(".section-title").forEach(el =>
   ScrollTrigger.create({
@@ -450,20 +739,22 @@ $$(".section-title").forEach(el =>
 /* ============================================================
    8. SERVICES 3D TILT + SPOTLIGHT
    ============================================================ */
-$$(".service-card[data-tilt]").forEach(card => {
-  const xTo = gsap.quickTo(card, "rotateY", { duration: 0.5, ease: "power3" });
-  const yTo = gsap.quickTo(card, "rotateX", { duration: 0.5, ease: "power3" });
+if (finePointerQuery.matches && !motionQuery.matches) {
+  $$(".service-card[data-tilt]").forEach(card => {
+    const xTo = gsap.quickTo(card, "rotateY", { duration: 0.5, ease: "power3" });
+    const yTo = gsap.quickTo(card, "rotateX", { duration: 0.5, ease: "power3" });
 
-  card.addEventListener("mousemove", e => {
-    const r  = card.getBoundingClientRect();
-    const dx = (e.clientX - r.left - r.width  / 2) / (r.width  / 2);
-    const dy = (e.clientY - r.top  - r.height / 2) / (r.height / 2);
-    xTo(dx * 7); yTo(-dy * 7);
-    card.style.setProperty("--mx", ((e.clientX - r.left) / r.width)  * 100 + "%");
-    card.style.setProperty("--my", ((e.clientY - r.top)  / r.height) * 100 + "%");
+    card.addEventListener("mousemove", e => {
+      const r  = card.getBoundingClientRect();
+      const dx = (e.clientX - r.left - r.width  / 2) / (r.width  / 2);
+      const dy = (e.clientY - r.top  - r.height / 2) / (r.height / 2);
+      xTo(dx * 7); yTo(-dy * 7);
+      card.style.setProperty("--mx", ((e.clientX - r.left) / r.width)  * 100 + "%");
+      card.style.setProperty("--my", ((e.clientY - r.top)  / r.height) * 100 + "%");
+    });
+    card.addEventListener("mouseleave", () => { xTo(0); yTo(0); });
   });
-  card.addEventListener("mouseleave", () => { xTo(0); yTo(0); });
-});
+}
 
 /* ============================================================
    9. BEFORE / AFTER SLIDER
@@ -483,9 +774,6 @@ $$(".service-card[data-tilt]").forEach(card => {
   const afterImg = $("#baImgAfter");
   const compareBar = $("#baCompareBar");
   const compareCols = compareBar ? Array.from(compareBar.querySelectorAll(".ba-compare-col")) : [];
-  const growthBadge = compareBar?.querySelector(".ba-growth-badge");
-  const liveKicker = $("#baLiveKicker");
-  const liveSub = $("#baLiveSub");
   if (!slider || !overlay || !beforeImg || !afterImg) return;
 
   const metricEls = compareBar ? Array.from(compareBar.querySelectorAll(".ba-c-val")) : [];
@@ -500,13 +788,7 @@ $$(".service-card[data-tilt]").forEach(card => {
       0
     ),
     format: el.dataset.format || "comma",
-    side: index < 2 ? "before" : "after",
   }));
-
-  const beforeViews = metrics[0]?.full || fallbackMetricValues[0];
-  const beforeReach = metrics[1]?.full || fallbackMetricValues[1];
-  const afterViews = metrics[2]?.full || fallbackMetricValues[2];
-  const afterReach = metrics[3]?.full || fallbackMetricValues[3];
 
   let currentPos = 50;
   let isDragging = false;
@@ -521,6 +803,10 @@ $$(".service-card[data-tilt]").forEach(card => {
   function pctFromClientX(clientX) {
     const rect = slider.getBoundingClientRect();
     return ((clientX - rect.left) / rect.width) * 100;
+  }
+
+  function ariaValueText(value) {
+    return `${Math.round(value)}% before image visible`;
   }
 
   function syncRevealVars(beforeShare) {
@@ -574,29 +860,6 @@ $$(".service-card[data-tilt]").forEach(card => {
     }
   }
 
-  function updateLiveBadge(beforeShare) {
-    const afterShare = 1 - beforeShare;
-    const currentViews = beforeViews + (afterViews - beforeViews) * afterShare;
-    const currentReach = beforeReach + (afterReach - beforeReach) * afterShare;
-    const viewsLift = beforeViews ? currentViews / beforeViews : 1;
-    const reachLift = beforeReach ? currentReach / beforeReach : 1;
-
-    if (liveKicker) {
-      liveKicker.textContent =
-        afterShare > 0.66 ? "Feb-Mar result in focus" :
-        beforeShare > 0.66 ? "Jan baseline in focus" :
-        "Split reveal";
-    }
-
-    if (growthBadge) {
-      growthBadge.textContent = `${viewsLift.toFixed(1)}x views lift`;
-    }
-
-    if (liveSub) {
-      liveSub.textContent = `${reachLift.toFixed(1)}x reach lift | ${Math.round(afterShare * 100)}% result reveal`;
-    }
-  }
-
   function renderMetrics(pct) {
     const beforeShare = clamp((pct - 2) / 96, 0, 1);
 
@@ -607,11 +870,10 @@ $$(".service-card[data-tilt]").forEach(card => {
     syncRevealVars(beforeShare);
     updateLabelStyles(beforeShare);
     updateCompareStyles(beforeShare);
-    updateLiveBadge(beforeShare);
   }
 
   function setPos(pct, instant = false) {
-    const value = clamp(pct, 2, 98);
+    const value = clamp(pct, 0, 100);
     currentPos = value;
 
     if (raf) cancelAnimationFrame(raf);
@@ -628,6 +890,7 @@ $$(".service-card[data-tilt]").forEach(card => {
       beforeImg.style.maskImage = mask;
       divider.style.left = value + "%";
       overlay.setAttribute("aria-valuenow", Math.round(value));
+      overlay.setAttribute("aria-valuetext", ariaValueText(value));
 
       renderMetrics(value);
     };
@@ -639,27 +902,29 @@ $$(".service-card[data-tilt]").forEach(card => {
     }
   }
 
-  const tiltX = gsap.quickTo(slider, "rotateY", { duration: 0.45, ease: "power3.out" });
-  const tiltY = gsap.quickTo(slider, "rotateX", { duration: 0.45, ease: "power3.out" });
+  if (finePointerQuery.matches && !motionQuery.matches) {
+    const tiltX = gsap.quickTo(slider, "rotateY", { duration: 0.45, ease: "power3.out" });
+    const tiltY = gsap.quickTo(slider, "rotateX", { duration: 0.45, ease: "power3.out" });
 
-  scene?.addEventListener("mousemove", (e) => {
-    const rect = slider.getBoundingClientRect();
+    scene?.addEventListener("mousemove", (e) => {
+      const rect = slider.getBoundingClientRect();
 
-    if (!isDragging) {
-      tiltX(((e.clientX - rect.left - rect.width / 2) / (rect.width / 2)) * 4.5);
-      tiltY(-((e.clientY - rect.top - rect.height / 2) / (rect.height / 2)) * 4);
-    }
+      if (!isDragging) {
+        tiltX(((e.clientX - rect.left - rect.width / 2) / (rect.width / 2)) * 4.5);
+        tiltY(-((e.clientY - rect.top - rect.height / 2) / (rect.height / 2)) * 4);
+      }
 
-    if (spotlight) {
-      spotlight.style.setProperty("--sx", ((e.clientX - rect.left) / rect.width) * 100 + "%");
-      spotlight.style.setProperty("--sy", ((e.clientY - rect.top) / rect.height) * 100 + "%");
-    }
-  }, { passive: true });
+      if (spotlight) {
+        spotlight.style.setProperty("--sx", ((e.clientX - rect.left) / rect.width) * 100 + "%");
+        spotlight.style.setProperty("--sy", ((e.clientY - rect.top) / rect.height) * 100 + "%");
+      }
+    }, { passive: true });
 
-  scene?.addEventListener("mouseleave", () => {
-    tiltX(0);
-    tiltY(0);
-  });
+    scene?.addEventListener("mouseleave", () => {
+      tiltX(0);
+      tiltY(0);
+    });
+  }
 
   function finishDrag(pointerId) {
     if (!isDragging) return;
@@ -692,15 +957,19 @@ $$(".service-card[data-tilt]").forEach(card => {
   overlay.addEventListener("lostpointercapture", () => finishDrag());
 
   overlay.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowLeft") {
-      setPos(currentPos - 3);
-      e.preventDefault();
-    }
+    const moves = {
+      ArrowLeft: -3,
+      ArrowRight: 3,
+      PageDown: -10,
+      PageUp: 10,
+    };
 
-    if (e.key === "ArrowRight") {
-      setPos(currentPos + 3);
-      e.preventDefault();
-    }
+    if (e.key === "Home") setPos(0);
+    else if (e.key === "End") setPos(100);
+    else if (e.key in moves) setPos(currentPos + moves[e.key]);
+    else return;
+
+    e.preventDefault();
   });
 
   setPos(50, true);
@@ -761,8 +1030,8 @@ $$(".service-card[data-tilt]").forEach(card => {
   const yTo = gsap.quickTo(btn, "y", { duration: 0.5, ease: "power3" });
   btn.addEventListener("mousemove", e => {
     const r = btn.getBoundingClientRect();
-    xTo((e.clientX - r.left - r.width  / 2) * 0.18);
-    yTo((e.clientY - r.top  - r.height / 2) * 0.18);
+    xTo((e.clientX - r.left - r.width  / 2) * 0.08);
+    yTo((e.clientY - r.top  - r.height / 2) * 0.08);
   });
   btn.addEventListener("mouseleave", () => { xTo(0); yTo(0); });
 })();
@@ -781,8 +1050,15 @@ $$(".service-card[data-tilt]").forEach(card => {
   const total = cards.length;
   if (!total) return;
 
+  const reducedMotion = motionQuery;
+  const IDLE_SPEED = 0.0062;
+  const DRAG_EASE = 0.3;
+  const SETTLE_EASE = 0.16;
   let step = 320;
   let rafId = 0;
+  let isRunning = false;
+  let isIntersecting = !("IntersectionObserver" in window);
+  let isHovering = false;
   const state = {
     position: 0,
     target: 0,
@@ -792,6 +1068,7 @@ $$(".service-card[data-tilt]").forEach(card => {
     lastX: 0,
     lastTime: 0,
     velocity: 0,
+    moved: false,
   };
 
   function wrapIndex(value) {
@@ -800,7 +1077,8 @@ $$(".service-card[data-tilt]").forEach(card => {
   }
 
   function shortestDistance(index, value) {
-    let distance = index - value;
+    const center = wrapIndex(value);
+    let distance = index - center;
     if (distance > total / 2) distance -= total;
     if (distance < -total / 2) distance += total;
     return distance;
@@ -808,6 +1086,10 @@ $$(".service-card[data-tilt]").forEach(card => {
 
   function clamp(value, min, max) {
     return Math.min(max, Math.max(min, value));
+  }
+
+  function smoothstep(value) {
+    return value * value * (3 - 2 * value);
   }
 
   function recalc() {
@@ -819,32 +1101,74 @@ $$(".service-card[data-tilt]").forEach(card => {
   }
 
   function updateCardStyles() {
+    const activeIndex = wrapIndex(Math.round(state.position));
+
     cards.forEach((card, index) => {
       const distance = shortestDistance(index, state.position);
       const absDistance = Math.abs(distance);
-      const focus = clamp(1 - absDistance / 2.75, 0, 1);
-      const x = distance * step;
-      const y = Math.pow(absDistance, 1.16) * 18;
-      const z = Math.round((focus * 170) - (absDistance * 72));
-      const rotateY = distance * -18;
-      const rotateX = 7;
-      const scale = 0.84 + focus * 0.2;
-      const blur = Math.max(0, (absDistance - 0.15) * 1.05);
-      const opacity = 0.34 + focus * 0.66;
-      const saturate = 0.8 + focus * 0.25;
-      const brightness = 0.74 + focus * 0.34;
-      const isActive = absDistance < 0.5;
+      const layerDistance = Math.abs(shortestDistance(index, activeIndex));
+      const depth = smoothstep(clamp(absDistance / 2.85, 0, 1));
+      const focus = 0.14 + (1 - smoothstep(clamp(absDistance / 1.85, 0, 1))) * 0.86;
+      const x = distance * step * (0.97 - depth * 0.04);
+      const y = Math.pow(depth, 1.35) * 26;
+      const z = 26 + Math.pow(focus, 1.4) * 206;
+      const rotateY = distance * -10.5;
+      const rotateX = 4.5;
+      const scale = 0.88 + focus * 0.16;
+      const blur = Math.max(0, (1 - focus) * 0.64);
+      const opacity = 0.42 + focus * 0.58;
+      const saturate = 0.82 + focus * 0.26;
+      const brightness = 0.78 + focus * 0.3;
+      const isActive = layerDistance === 0;
 
       card.classList.toggle("is-active", isActive);
-      card.style.zIndex = String(Math.round((focus + 0.2) * 100));
+      card.setAttribute("aria-current", isActive ? "true" : "false");
+      card.style.setProperty("--template-focus", focus.toFixed(3));
+      card.style.zIndex = String(1000 - Math.round(absDistance * 120));
       card.style.opacity = opacity.toFixed(3);
       card.style.filter = `blur(${blur.toFixed(2)}px) saturate(${saturate.toFixed(3)}) brightness(${brightness.toFixed(3)})`;
       card.style.transform = `translate3d(calc(-50% + ${x.toFixed(2)}px), ${y.toFixed(2)}px, ${z}px) rotateX(${rotateX}deg) rotateY(${rotateY.toFixed(2)}deg) scale(${scale.toFixed(3)})`;
     });
   }
 
+  function hasPendingMotion() {
+    return Math.abs(state.target - state.position) > 0.001;
+  }
+
+  function shouldRunFrame() {
+    return !document.hidden && !reducedMotion.matches && (state.dragging || hasPendingMotion() || (!isHovering && isIntersecting));
+  }
+
+  function stopTick() {
+    if (rafId) window.cancelAnimationFrame(rafId);
+    rafId = 0;
+    isRunning = false;
+  }
+
+  function startTick() {
+    if (isRunning || !shouldRunFrame()) return;
+    isRunning = true;
+    tick();
+  }
+
+  function renderInteractionFrame() {
+    state.position = state.target;
+    updateCardStyles();
+  }
+
   function tick() {
-    const easing = state.dragging ? 0.24 : 0.13;
+    if (!isRunning) return;
+    if (!shouldRunFrame()) {
+      rafId = 0;
+      isRunning = false;
+      return;
+    }
+
+    if (!state.dragging && !isHovering && isIntersecting) {
+      state.target += IDLE_SPEED;
+    }
+
+    const easing = state.dragging ? DRAG_EASE : SETTLE_EASE;
     state.position += (state.target - state.position) * easing;
 
     if (!state.dragging && Math.abs(state.target - state.position) < 0.001) {
@@ -856,18 +1180,23 @@ $$(".service-card[data-tilt]").forEach(card => {
   }
 
   function snapToNearest(extraShift = 0) {
-    state.target = wrapIndex(Math.round(state.target + extraShift));
+    state.target = Math.round(state.target + extraShift);
   }
 
   function onPointerDown(event) {
+    if (event.button && event.button !== 0) return;
+    state.target = state.position;
     state.dragging = true;
     state.startX = event.clientX;
     state.startTarget = state.target;
     state.lastX = event.clientX;
     state.lastTime = performance.now();
     state.velocity = 0;
+    state.moved = false;
     viewport.classList.add("is-dragging");
     viewport.setPointerCapture?.(event.pointerId);
+    if (reducedMotion.matches) renderInteractionFrame();
+    else startTick();
   }
 
   function onPointerMove(event) {
@@ -878,32 +1207,102 @@ $$(".service-card[data-tilt]").forEach(card => {
     const deltaTime = Math.max(now - state.lastTime, 16);
 
     state.target = state.startTarget - (deltaX / step);
+    state.moved = state.moved || Math.abs(deltaX) > 6;
     state.velocity = (event.clientX - state.lastX) / deltaTime;
     state.lastX = event.clientX;
     state.lastTime = now;
+
+    if (reducedMotion.matches) renderInteractionFrame();
+    else startTick();
   }
 
   function onPointerUp(event) {
     if (!state.dragging) return;
+    const wasMoved = state.moved;
     state.dragging = false;
     viewport.classList.remove("is-dragging");
     viewport.releasePointerCapture?.(event.pointerId);
 
-    const momentum = clamp(-state.velocity * 7.5, -0.35, 0.35);
+    const momentum = reducedMotion.matches || !wasMoved ? 0 : clamp(-state.velocity * 6.5, -0.3, 0.3);
     snapToNearest(momentum);
+    if (reducedMotion.matches) renderInteractionFrame();
+    else startTick();
   }
 
+  function focusCard(index) {
+    const shift = shortestDistance(index, state.target);
+    state.target += shift;
+    snapToNearest();
+    if (reducedMotion.matches) renderInteractionFrame();
+    else startTick();
+  }
+
+  function onResize() {
+    recalc();
+    updateCardStyles();
+    startTick();
+  }
+
+  function onMotionChange() {
+    if (reducedMotion.matches) {
+      stopTick();
+      renderInteractionFrame();
+    } else {
+      startTick();
+    }
+  }
+
+  function onVisibilityChange() {
+    if (document.hidden) stopTick();
+    else startTick();
+  }
+
+  function onPointerEnter() {
+    isHovering = true;
+    viewport.classList.add("is-paused");
+    if (!state.dragging && !hasPendingMotion()) stopTick();
+  }
+
+  function onPointerLeave() {
+    isHovering = false;
+    viewport.classList.remove("is-paused");
+    startTick();
+  }
+
+  viewport.addEventListener("pointerenter", onPointerEnter);
+  viewport.addEventListener("pointerleave", onPointerLeave);
   viewport.addEventListener("pointerdown", onPointerDown);
+  cards.forEach((card, index) => {
+    card.addEventListener("click", () => {
+      if (state.moved) return;
+      focusCard(index);
+    });
+  });
   window.addEventListener("pointermove", onPointerMove, { passive: true });
   window.addEventListener("pointerup", onPointerUp);
   window.addEventListener("pointercancel", onPointerUp);
-  window.addEventListener("resize", recalc, { passive: true });
+  window.addEventListener("resize", onResize, { passive: true });
+  reducedMotion.addEventListener("change", onMotionChange);
+  document.addEventListener("visibilitychange", onVisibilityChange);
+
+  let observer = null;
+  if ("IntersectionObserver" in window) {
+    observer = new IntersectionObserver(([entry]) => {
+      isIntersecting = entry?.isIntersecting || false;
+      if (isIntersecting) startTick();
+      else stopTick();
+    }, { threshold: 0.01 });
+    observer.observe(viewport);
+  }
 
   recalc();
   updateCardStyles();
-  tick();
+  startTick();
 
-  window.addEventListener("beforeunload", () => window.cancelAnimationFrame(rafId), { passive: true });
+  window.addEventListener("beforeunload", () => {
+    stopTick();
+    observer?.disconnect();
+  }, { passive: true });
 })();
 /* ============================================================
    12. CONTACT FORM
@@ -913,9 +1312,53 @@ $$(".service-card[data-tilt]").forEach(card => {
   if (!form) return;
   const btn          = $("#contactBtn");
   const successPanel = $("#formSuccess");
+  const nameInput    = $("#fname");
+  const phoneInput   = $("#fphone");
+  const serviceInput = $("#fservice");
   const msgArea      = $("#fmsg");
   const charCountEl  = $("#charCount");
-  const URL          = window.__APPS_SCRIPT_URL__ || "";
+  const phoneCode    = $("#fphoneCode");
+  const phoneCountry = $("#fphoneCountry");
+  const phoneButton  = $("#phoneCodeButton");
+  const phoneList    = $("#phoneCodeList");
+  const phoneFlag    = $("#phoneCodeFlag");
+  const phoneText    = $("#phoneCodeText");
+  const phoneWrap    = phoneButton?.closest(".phone-code-wrap");
+  const phoneOptions = $$("[data-phone-option]");
+  const budgetInput  = $("#fbudget");
+  const budgetError  = $("#err-budget");
+  const formError    = $("#formError");
+  let budgetErrorTimer;
+
+  const NAME_RE = /^[\p{L}\p{M}][\p{L}\p{M}' .-]{1,79}$/u;
+  const PHONE_RE = /^[0-9+() .-]+$/;
+  const PHONE_MAX_DIGITS = Number(phoneInput?.dataset.maxDigits || 15);
+  const UNSAFE_TEXT_RE = /[<>]|[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;
+
+  function normalizeSpaces(value) {
+    return value.trim().replace(/\s+/g, " ");
+  }
+
+  function countDigits(value) {
+    return (value.match(/\d/g) || []).length;
+  }
+
+  function limitPhoneDigits(value) {
+    let digitCount = 0;
+    return Array.from(value).filter(char => {
+      if (!/\d/.test(char)) return true;
+      digitCount += 1;
+      return digitCount <= PHONE_MAX_DIGITS;
+    }).join("");
+  }
+
+  function cleanPhoneValue(value) {
+    return limitPhoneDigits(value)
+      .replace(/[^0-9+() .-]/g, "")
+      .replace(/(?!^)\+/g, "")
+      .replace(/\s{2,}/g, " ")
+      .slice(0, 20);
+  }
 
   msgArea?.addEventListener("input", () => {
     const n = msgArea.value.length;
@@ -924,20 +1367,224 @@ $$(".service-card[data-tilt]").forEach(card => {
     if (n > 500) msgArea.value = msgArea.value.slice(0, 500);
   });
 
-  function validate(el) {
-    const v = el.value.trim();
+  function syncPhonePicker(option = phoneCode?.selectedOptions?.[0]) {
+    if (!option || !phoneFlag || !phoneText) return;
+    const iso = option.dataset.iso;
+    const name = option.dataset.name || "";
+    const code = option.dataset.code || option.value;
+    if (iso) {
+      phoneFlag.src = `https://flagcdn.com/w40/${iso}.png`;
+      phoneFlag.srcset = `https://flagcdn.com/w40/${iso}.png 1x, https://flagcdn.com/w80/${iso}.png 2x`;
+    }
+    phoneFlag.alt = "";
+    phoneText.textContent = code;
+    if (phoneCountry) phoneCountry.value = name;
+    phoneOptions.forEach(btn => {
+      btn.setAttribute("aria-selected", btn.dataset.iso === iso && btn.dataset.name === name ? "true" : "false");
+    });
+  }
+
+  function closePhonePicker() {
+    if (!phoneButton || !phoneList) return;
+    phoneButton.setAttribute("aria-expanded", "false");
+    phoneList.hidden = true;
+    phoneWrap?.classList.remove("is-open");
+  }
+
+  function openPhonePicker() {
+    if (!phoneButton || !phoneList) return;
+    phoneButton.setAttribute("aria-expanded", "true");
+    phoneList.hidden = false;
+    phoneWrap?.classList.add("is-open");
+    phoneList.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: "nearest" });
+  }
+
+  function togglePhonePicker() {
+    if (phoneList?.hidden) openPhonePicker();
+    else closePhonePicker();
+  }
+
+  function selectPhoneOption(btn) {
+    if (!phoneCode || !btn) return;
+    const iso = btn.dataset.iso;
+    const code = btn.dataset.code;
+    const name = btn.dataset.name;
+    const option = Array.from(phoneCode.options).find(item =>
+      item.dataset.iso === iso && item.dataset.code === code && item.dataset.name === name
+    );
+    if (!option) return;
+    Array.from(phoneCode.options).forEach(item => { item.selected = item === option; });
+    syncPhonePicker(option);
+    phoneCode.dispatchEvent(new Event("change", { bubbles: true }));
+    closePhonePicker();
+    phoneButton?.focus();
+  }
+
+  phoneButton?.addEventListener("click", togglePhonePicker);
+  phoneButton?.addEventListener("keydown", e => {
+    if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openPhonePicker();
+      phoneList?.querySelector('[aria-selected="true"]')?.focus();
+    }
+  });
+  phoneOptions.forEach(btn => {
+    btn.addEventListener("click", () => selectPhoneOption(btn));
+    btn.addEventListener("keydown", e => {
+      const current = phoneOptions.indexOf(btn);
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        phoneOptions[Math.min(current + 1, phoneOptions.length - 1)]?.focus();
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        phoneOptions[Math.max(current - 1, 0)]?.focus();
+      }
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        selectPhoneOption(btn);
+      }
+      if (e.key === "Escape") {
+        closePhonePicker();
+        phoneButton?.focus();
+      }
+    });
+  });
+  document.addEventListener("click", e => {
+    if (!phoneWrap?.contains(e.target)) closePhonePicker();
+  });
+  phoneCode?.addEventListener("change", () => syncPhonePicker());
+  syncPhonePicker();
+
+  function showBudgetDigitError() {
+    if (!budgetError || !budgetInput) return;
+    budgetError.textContent = "Use numeric digits only.";
+    budgetInput.classList.add("field-invalid");
+    window.clearTimeout(budgetErrorTimer);
+    budgetErrorTimer = window.setTimeout(() => {
+      budgetError.textContent = "";
+      budgetInput.classList.remove("field-invalid");
+    }, 2400);
+  }
+
+  function validateBudget() {
+    if (!budgetError || !budgetInput) return true;
+    const digits = budgetInput.value.replace(/\D/g, "").slice(0, 12);
+    budgetInput.value = digits;
+
     let err = "";
-    if (el.id === "fname"   && (!v || v.length < 2)) err = v ? "Min 2 characters." : "Name is required.";
-    if (el.id === "femail"  && (!v || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v))) err = v ? "Enter valid email." : "Email is required.";
+    if (digits && Number(digits) <= 0) err = "Enter a realistic budget amount.";
+
+    budgetError.textContent = err;
+    budgetInput.classList.toggle("field-invalid", !!err);
+    return !err;
+  }
+
+  budgetInput?.addEventListener("beforeinput", e => {
+    if (e.data && /\D/.test(e.data)) {
+      e.preventDefault();
+      showBudgetDigitError();
+    }
+  });
+
+  budgetInput?.addEventListener("paste", e => {
+    const text = e.clipboardData?.getData("text") || "";
+    if (!/\D/.test(text)) return;
+    e.preventDefault();
+    const start = budgetInput.selectionStart ?? budgetInput.value.length;
+    const end = budgetInput.selectionEnd ?? start;
+    const openSlots = Math.max(0, 12 - (budgetInput.value.length - (end - start)));
+    const digits = text.replace(/\D/g, "").slice(0, openSlots);
+    budgetInput.setRangeText(digits, start, end, "end");
+    showBudgetDigitError();
+    validateBudget();
+  });
+
+  budgetInput?.addEventListener("input", () => {
+    const digits = budgetInput.value.replace(/\D/g, "").slice(0, 12);
+    if (budgetInput.value !== digits) {
+      budgetInput.value = digits;
+      showBudgetDigitError();
+    }
+    if (budgetInput.classList.contains("field-invalid")) validateBudget();
+  });
+
+  phoneInput?.addEventListener("beforeinput", e => {
+    if (!e.data || !/\d/.test(e.data)) return;
+    const start = phoneInput.selectionStart ?? phoneInput.value.length;
+    const end = phoneInput.selectionEnd ?? start;
+    const next = phoneInput.value.slice(0, start) + e.data + phoneInput.value.slice(end);
+    if (countDigits(next) > PHONE_MAX_DIGITS) e.preventDefault();
+  });
+
+  phoneInput?.addEventListener("paste", e => {
+    const text = e.clipboardData?.getData("text") || "";
+    const start = phoneInput.selectionStart ?? phoneInput.value.length;
+    const end = phoneInput.selectionEnd ?? start;
+    const next = phoneInput.value.slice(0, start) + text + phoneInput.value.slice(end);
+    const clean = cleanPhoneValue(next);
+    if (next === clean && countDigits(next) <= PHONE_MAX_DIGITS) return;
+    e.preventDefault();
+    phoneInput.value = clean;
+    validate(phoneInput);
+  });
+
+  phoneInput?.addEventListener("input", () => {
+    const clean = cleanPhoneValue(phoneInput.value);
+    if (phoneInput.value !== clean) phoneInput.value = clean;
+    if (phoneInput.classList.contains("field-invalid")) validate(phoneInput);
+  });
+
+  function hideError() {
+    if (!formError) return;
+    formError.hidden = true;
+    formError.textContent = "";
+  }
+
+  function showError() {
+    if (!formError) return;
+    formError.textContent = "Something went wrong while sending your message. Please try again.";
+    formError.hidden = false;
+  }
+
+  function validate(el) {
+    if (!el) return false;
+    const v = el.id === "fmsg" ? el.value.trim() : normalizeSpaces(el.value);
+    let err = "";
+    if (el.id === "fname") {
+      el.value = v;
+      if (!v) err = "Name is required.";
+      else if (v.length < 2) err = "Min 2 characters.";
+      else if (v.length > 80) err = "Name is too long.";
+      else if (UNSAFE_TEXT_RE.test(v) || !NAME_RE.test(v)) err = "Use your real name without numbers or symbols.";
+    }
+    if (el.id === "fphone") {
+      el.value = cleanPhoneValue(v);
+      const phoneValue = el.value;
+      const digitCount = phoneValue.replace(/\D/g, "").length;
+      if (!phoneValue) err = "WhatsApp phone number is required.";
+      else if (!PHONE_RE.test(phoneValue)) err = "Use numbers and phone separators only.";
+      else if (digitCount < 5) err = "Enter a valid WhatsApp phone number.";
+      else if (digitCount > PHONE_MAX_DIGITS) err = `Phone number can use up to ${PHONE_MAX_DIGITS} digits.`;
+    }
     if (el.id === "fservice" && !el.value)  err = "Please select a service.";
-    if (el.id === "fmsg"    && (!v || v.length < 10)) err = v ? "Message too short." : "Please describe your project.";
+    if (el.id === "fbudget") {
+      return validateBudget();
+    }
+    if (el.id === "fmsg") {
+      el.value = v;
+      if (!v) err = "Please describe your project.";
+      else if (v.length < 10) err = "Message too short.";
+      else if (v.length > 500) err = "Message is too long.";
+      else if (UNSAFE_TEXT_RE.test(v)) err = "Please remove special markup characters.";
+    }
     const errEl = document.getElementById("err-" + el.name);
     if (errEl) errEl.textContent = err;
     el.classList.toggle("field-invalid", !!err);
     return !err;
   }
 
-  ["fname","femail","fservice","fmsg"].forEach(id => {
+  ["fname","fphone","fservice","fbudget","fmsg"].forEach(id => {
     const el = document.getElementById(id);
     el?.addEventListener("blur",  () => validate(el));
     el?.addEventListener("input", () => { if (el.classList.contains("field-invalid")) validate(el); });
@@ -945,21 +1592,29 @@ $$(".service-card[data-tilt]").forEach(card => {
 
   form.addEventListener("submit", async e => {
     e.preventDefault();
-    const name = $("#fname"), email = $("#femail"), service = $("#fservice"), budget = $("#fbudget"), msg = $("#fmsg");
-    if (![validate(name), validate(email), validate(service), validate(msg)].every(Boolean)) {
+    hideError();
+    if (![validate(nameInput), validate(phoneInput), validate(serviceInput), validate(budgetInput), validate(msgArea)].every(Boolean)) {
       form.querySelector(".field-invalid")?.focus(); return;
     }
     btn.classList.add("loading"); btn.disabled = true;
     try {
-      await fetch(URL, { method:"POST", mode:"no-cors", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({ timestamp: new Date().toISOString(), name: name.value.trim(), email: email.value.trim(),
-          service: service.value, budget: budget?.value || "Not specified", message: msg.value.trim() }) });
-      showSuccess();
-    } catch { showSuccess(); }
+      const body = new URLSearchParams(new FormData(form)).toString();
+      const res = await fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body,
+      });
+
+      if (res.ok) showSuccess();
+      else showError();
+    } catch {
+      showError();
+    }
     finally { btn.classList.remove("loading"); btn.disabled = false; }
   });
 
   function showSuccess() {
+    hideError();
     form.classList.add("fading");
     setTimeout(() => {
       form.hidden = true; form.classList.remove("fading");
@@ -973,6 +1628,8 @@ $$(".service-card[data-tilt]").forEach(card => {
         setTimeout(() => {
           successPanel.classList.remove("exiting"); successPanel.hidden = true;
           form.reset();
+          syncPhonePicker();
+          closePhonePicker();
           $$(".field-invalid").forEach(el => el.classList.remove("field-invalid"));
           $$(".field-error").forEach(el => el.textContent = "");
           if (charCountEl) charCountEl.textContent = "0";
