@@ -1,0 +1,120 @@
+#preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  overscroll-behavior: contain;
+  background:
+    radial-gradient(circle at 50% 28%, rgba(198, 154, 120, 0.08), transparent 38%),
+    var(--lux-bg-deep);
+  transition:
+    opacity 1.05s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 1.05s ease,
+    background 1.05s ease;
+}
+
+#preloader.is-exiting {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#preloader.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.preloader-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  text-align: center;
+  transition:
+    opacity 0.82s ease,
+    transform 0.92s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#preloader.is-exiting .preloader-inner {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.992);
+}
+
+.preloader-name {
+  font-size: 4.5rem;
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: fadeUp 0.72s cubic-bezier(0.16, 1, 0.3, 1) 0.04s forwards;
+}
+
+.preloader-counters {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  opacity: 0;
+  animation: fadeUp 0.48s ease 0.14s forwards;
+}
+
+.preloader-counter-item {
+  text-align: center;
+}
+
+.counter-val {
+  font-size: 3.2rem;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--lux-ivory);
+}
+
+.counter-suffix {
+  font-size: 1.8rem;
+  font-weight: 300;
+  color: var(--lux-champagne);
+}
+
+.counter-desc {
+  display: block;
+  margin-top: 6px;
+  color: var(--lux-muted-soft);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.preloader-counter-sep {
+  width: 1px;
+  height: 36px;
+  background: var(--lux-line);
+}
+
+.preloader-bar-wrap {
+  width: 200px;
+  height: 2px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: rgba(214, 184, 152, 0.12);
+  opacity: 0;
+  animation: fadeUp 0.38s ease 0.2s forwards;
+}
+
+.preloader-bar {
+  width: 0%;
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--lux-accent), var(--lux-champagne));
+  transition: none;
+}
+
+@keyframes fadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

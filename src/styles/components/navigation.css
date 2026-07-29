@@ -1,0 +1,215 @@
+.nav {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 1000;
+  background: linear-gradient(180deg, rgba(6, 13, 20, 0.24) 0%, rgba(6, 13, 20, 0) 100%);
+  border-bottom: 1px solid transparent;
+  transition:
+    background var(--ease),
+    border-color var(--ease),
+    box-shadow var(--ease),
+    backdrop-filter var(--ease);
+}
+
+.nav.scrolled {
+  background: rgba(6, 13, 20, 0.84);
+  border-color: rgba(214, 184, 152, 0.16);
+  box-shadow: 0 18px 52px rgba(0, 0, 0, 0.26);
+  backdrop-filter: blur(22px) saturate(145%);
+  -webkit-backdrop-filter: blur(22px) saturate(145%);
+}
+
+.nav-inner {
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.nav-logo {
+  --shine-x: 50%;
+  --shine-y: 50%;
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  flex-shrink: 0;
+  margin: -4px -6px;
+  padding: 4px 6px;
+  overflow: visible;
+  isolation: isolate;
+  contain: paint;
+  color: var(--lux-champagne);
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  font-size: 1.88rem;
+  line-height: 1;
+  transition:
+    color 0.28s ease,
+    filter 0.28s ease,
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nav-logo::after {
+  content: none;
+  position: absolute;
+}
+
+.nav-logo-f {
+  font-size: 2.13rem;
+}
+
+.nav-logo:hover,
+.nav-logo:focus-visible {
+  background:
+    radial-gradient(
+      circle 92px at var(--shine-x) var(--shine-y),
+      #ffffff 0%,
+      #fff3d3 12%,
+      rgba(226, 181, 118, 0.84) 26%,
+      transparent 46%
+    ),
+    linear-gradient(var(--lux-champagne), var(--lux-champagne));
+  background-size: 100% 100%;
+  background-position: 50% 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter:
+    brightness(1.1)
+    drop-shadow(0 1px 7px rgba(212, 165, 116, 0.14));
+  transform: translateY(-1px) scale(1.045);
+}
+
+.nav-logo:hover::after,
+.nav-logo:focus-visible::after {
+  content: none;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  margin: 0 auto;
+}
+
+.nav-links a,
+.nav-mobile a {
+  position: relative;
+  color: rgba(232, 226, 214, 0.76);
+  font-family: "Syne", sans-serif;
+  font-size: 0.92rem;
+  font-weight: 500;
+  transition:
+    color 0.22s ease,
+    filter 0.22s ease,
+    transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nav-links a {
+  display: inline-block;
+  transform-origin: center;
+}
+
+.nav-mobile a {
+  display: block;
+  transform-origin: left center;
+}
+
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -5px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(212, 165, 116, 0.18), var(--lux-champagne), rgba(212, 165, 116, 0.18));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--ease);
+}
+
+.nav-links a:hover,
+.nav-links a:focus-visible,
+.nav-mobile a:hover,
+.nav-mobile a:focus-visible {
+  color: var(--lux-champagne);
+  filter: brightness(1.08);
+}
+
+.nav-links a:hover,
+.nav-links a:focus-visible {
+  transform: scale(1.055);
+}
+
+.nav-mobile a:hover,
+.nav-mobile a:focus-visible {
+  transform: scale(1.025);
+}
+
+.nav-links a:hover::after,
+.nav-links a:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.nav-cta {
+  isolation: isolate;
+  contain: paint;
+  min-height: 40px;
+  padding: 12px 26px;
+  font-size: 0.95rem;
+}
+
+.nav-cta:hover,
+.nav-cta:focus-visible {
+  transform: translateY(-1px);
+}
+
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.nav-toggle span {
+  display: block;
+  width: 22px;
+  height: 1.5px;
+  background: var(--lux-muted);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.nav-toggle[aria-expanded="true"] span:nth-child(1) {
+  transform: translateY(6.5px) rotate(45deg);
+}
+
+.nav-toggle[aria-expanded="true"] span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-toggle[aria-expanded="true"] span:nth-child(3) {
+  transform: translateY(-6.5px) rotate(-45deg);
+}
+
+.nav-mobile {
+  display: none;
+  flex-direction: column;
+  background: #060d14;
+  border-bottom: 1px solid rgba(214, 184, 152, 0.14);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.nav-mobile.open {
+  display: flex;
+}
+
+.nav-mobile a {
+  padding: 16px 32px;
+  border-bottom: 1px solid rgba(214, 184, 152, 0.08);
+  font-size: 0.88rem;
+}

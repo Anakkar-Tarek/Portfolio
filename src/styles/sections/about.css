@@ -1,0 +1,30 @@
+.about-orb {
+  --orb-size: clamp(760px, 55vw, 1060px);
+  --orb-x: 70%;
+  --orb-y: 30%;
+}
+
+.services-orb {
+  --orb-size: clamp(760px, 56vw, 1080px);
+  --orb-x: 30%;
+  --orb-y: 54%;
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(0, 1.5fr);
+  gap: 90px;
+  align-items: start;
+}
+
+.about-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 42px;
+}
+
+.about-body {
+  align-self: center;
+  padding-top: clamp(28px, 5vh, 72px);
+}

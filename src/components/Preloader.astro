@@ -1,23 +1,19 @@
 ---
+import { preloaderCounters } from "../data/preloader";
 ---
 <div id="preloader">
   <div class="preloader-inner">
     <div class="preloader-name">Fadoua Badih</div>
     <div class="preloader-counters">
-      <div class="preloader-counter-item">
-        <span class="counter-val" data-target="5">0</span><span class="counter-suffix">+</span>
-        <span class="counter-desc">Years</span>
-      </div>
-      <div class="preloader-counter-sep"></div>
-      <div class="preloader-counter-item">
-        <span class="counter-val" data-target="20">0</span><span class="counter-suffix">+</span>
-        <span class="counter-desc">Brands</span>
-      </div>
-      <div class="preloader-counter-sep"></div>
-      <div class="preloader-counter-item">
-        <span class="counter-val" data-target="360">0</span><span class="counter-suffix">°</span>
-        <span class="counter-desc">Digital</span>
-      </div>
+      {preloaderCounters.map((counter, index) => (
+        <>
+          {index > 0 && <div class="preloader-counter-sep"></div>}
+          <div class="preloader-counter-item">
+            <span class="counter-val" data-target={counter.target}>0</span><span class="counter-suffix">{counter.suffix}</span>
+            <span class="counter-desc">{counter.desc}</span>
+          </div>
+        </>
+      ))}
     </div>
     <div class="preloader-bar-wrap"><div class="preloader-bar"></div></div>
   </div>

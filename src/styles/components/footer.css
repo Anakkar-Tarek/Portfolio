@@ -1,0 +1,84 @@
+.lux-footer {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  width: 100%;
+  margin-top: 0;
+  padding: 24px 0 22px;
+  border-top: 0;
+  background:
+    radial-gradient(circle at 82% 0%, rgba(185, 166, 138, 0.032) 0%, transparent 34%),
+    radial-gradient(circle at 12% 100%, rgba(82, 146, 168, 0.024) 0%, transparent 34%),
+    linear-gradient(180deg, #05090e 0%, #05090e 44%, #04070c 100%);
+}
+
+.lux-footer::before {
+  content: "";
+  position: absolute;
+  inset: 0 7% auto;
+  height: 1px;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(214, 184, 152, 0.24), transparent);
+}
+
+.lux-footer::after {
+  content: none;
+}
+
+.footer-inner {
+  position: relative;
+  z-index: 3;
+  width: min(1280px, calc(100% - 80px));
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.footer-logo {
+  font-size: 1.12rem;
+}
+
+.footer-tagline,
+.footer-copy,
+.footer-links a {
+  color: var(--lux-muted-soft);
+  font-size: 0.76rem;
+}
+
+.footer-tagline {
+  letter-spacing: 0.08em;
+}
+
+.footer-links {
+  display: flex;
+  gap: 28px;
+}
+
+.footer-links a {
+  font-family: "Syne", sans-serif;
+  transition: color 0.2s ease;
+}
+
+.footer-links a:hover,
+.footer-links a:focus-visible {
+  color: var(--lux-champagne);
+}
+
+.footer-copy {
+  margin: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--lux-champagne);
+  outline-offset: 3px;
+}

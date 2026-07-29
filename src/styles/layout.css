@@ -1,0 +1,431 @@
+.container,
+.nav-inner,
+.footer-inner {
+  width: min(1280px, calc(100% - 80px));
+  margin: 0 auto;
+}
+
+section {
+  --section-y: 104px;
+  --section-overlap: 112px;
+  position: relative;
+  padding: var(--section-y) 0;
+}
+
+.lux-section {
+  position: relative;
+  overflow: hidden;
+  background: var(--lux-section-bg, linear-gradient(180deg, var(--lux-bg-mid), var(--lux-bg-deep)));
+}
+
+.lux-section + .lux-section {
+  margin-top: calc(var(--section-overlap) * -1);
+  padding-top: calc(var(--section-y) + var(--section-overlap));
+  -webkit-mask-image:
+    linear-gradient(180deg, transparent 0, rgba(0, 0, 0, 0.24) 38px, rgba(0, 0, 0, 0.72) 82px, #000 var(--section-overlap), #000 100%);
+  mask-image:
+    linear-gradient(180deg, transparent 0, rgba(0, 0, 0, 0.24) 38px, rgba(0, 0, 0, 0.72) 82px, #000 var(--section-overlap), #000 100%);
+}
+
+.lux-section > .container {
+  position: relative;
+  z-index: 3;
+}
+
+.lux-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle, rgba(232, 200, 154, 0.1) 0 1px, transparent 1.7px),
+    radial-gradient(circle, rgba(128, 174, 188, 0.09) 0 1px, transparent 1.6px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.014) 0 1px, transparent 1px 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.012) 0 1px, transparent 1px 100%);
+  background-position: 0 0, 44px 28px, 0 0, 0 0;
+  background-size: 148px 148px, 214px 214px, 96px 96px, 96px 96px;
+  opacity: 0.045;
+  mask-image: linear-gradient(180deg, transparent 0%, #000 24%, #000 76%, transparent 100%);
+}
+
+.lux-section::after {
+  content: "";
+  position: absolute;
+  inset: -12% -8%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.56;
+  background:
+    radial-gradient(ellipse at 50% -4%, rgba(232, 200, 154, 0.045) 0%, transparent 44%),
+    radial-gradient(ellipse at 12% 58%, rgba(128, 174, 188, 0.03) 0%, transparent 35%),
+    radial-gradient(ellipse at 88% 60%, rgba(198, 154, 120, 0.028) 0%, transparent 35%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.012) 0%, transparent 34%, transparent 66%, rgba(5, 10, 16, 0.18) 100%);
+  mix-blend-mode: screen;
+}
+
+.lux-section--cinematic {
+  --lux-section-bg:
+    radial-gradient(circle at 82% 18%, rgba(198, 154, 120, 0.13) 0%, transparent 28%),
+    radial-gradient(circle at 12% 74%, rgba(52, 102, 121, 0.09) 0%, transparent 30%),
+    linear-gradient(180deg, rgba(6, 13, 20, 0.2) 0%, rgba(7, 14, 21, 0.74) 76%, rgba(8, 16, 23, 0.94) 100%);
+}
+
+.lux-section--cinematic::after {
+  opacity: 0;
+}
+
+.lux-section--cinematic::before {
+  opacity: 0.15;
+  background-size: 112px 112px, 176px 176px, 92px 92px, 92px 92px;
+  mask-image: linear-gradient(180deg, #000 0%, #000 78%, transparent 100%);
+}
+
+.lux-section--calm {
+  --lux-section-bg:
+    radial-gradient(circle at 15% 20%, rgba(128, 174, 188, 0.075) 0%, transparent 30%),
+    radial-gradient(circle at 86% 10%, rgba(198, 154, 120, 0.072) 0%, transparent 28%),
+    linear-gradient(180deg, #081017 0%, var(--lux-bg-mid) 100%);
+}
+
+.lux-section--services {
+  --lux-section-bg:
+    radial-gradient(circle at 82% 14%, rgba(198, 154, 120, 0.085) 0%, transparent 28%),
+    radial-gradient(circle at 12% 70%, rgba(128, 174, 188, 0.052) 0%, transparent 31%),
+    linear-gradient(145deg, #070e15 0%, var(--lux-bg-soft) 52%, #070d13 100%);
+}
+
+.lux-section--process {
+  --lux-section-bg:
+    radial-gradient(circle at 13% 82%, rgba(128, 174, 188, 0.08) 0%, transparent 28%),
+    radial-gradient(circle at 90% 26%, rgba(198, 154, 120, 0.07) 0%, transparent 31%),
+    linear-gradient(220deg, #09121a 0%, #0d1a24 48%, #081017 100%);
+}
+
+.lux-section--feature {
+  --lux-section-bg:
+    radial-gradient(circle at 50% 18%, rgba(198, 154, 120, 0.17) 0%, transparent 31%),
+    radial-gradient(circle at 18% 72%, rgba(128, 174, 188, 0.07) 0%, transparent 29%),
+    linear-gradient(180deg, #081017 0%, #0c1821 48%, #081017 100%);
+}
+
+.lux-section--showcase {
+  --lux-section-bg:
+    radial-gradient(circle at 50% 8%, rgba(198, 154, 120, 0.12) 0%, transparent 25%),
+    radial-gradient(circle at 14% 78%, rgba(128, 174, 188, 0.068) 0%, transparent 28%),
+    linear-gradient(180deg, #081017 0%, #0a121b 100%);
+}
+
+.lux-section--return {
+  --lux-section-bg:
+    radial-gradient(circle at 20% 12%, rgba(128, 174, 188, 0.095) 0%, transparent 29%),
+    radial-gradient(circle at 78% 20%, rgba(198, 154, 120, 0.11) 0%, transparent 31%),
+    radial-gradient(circle at 50% 86%, rgba(126, 152, 158, 0.035) 0%, transparent 34%),
+    linear-gradient(180deg, #081017 0%, #070d13 58%, #05090e 100%);
+}
+
+.section-label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  --label-dot-scale: 0.35;
+  --label-dot-opacity: 0;
+  --label-dot-translate: translateY(-50%);
+  color: var(--lux-champagne);
+  font-family: var(--font-heading);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  line-height: 1;
+  text-transform: uppercase;
+  text-shadow: 0 0 0 rgba(232, 200, 154, 0);
+  transition:
+    color var(--ease-fast),
+    filter var(--ease-fast),
+    text-shadow var(--ease-fast);
+}
+
+.section-label::before {
+  content: "";
+  width: 30px;
+  height: 1px;
+  flex: 0 0 auto;
+  background: linear-gradient(90deg, rgba(212, 165, 116, 0.18), var(--lux-champagne), rgba(212, 165, 116, 0.18));
+  transform-origin: center;
+  transition:
+    opacity var(--ease-fast),
+    transform var(--ease-fast),
+    background var(--ease-fast),
+    box-shadow var(--ease-fast);
+}
+
+.section-label::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -12px;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  opacity: var(--label-dot-opacity);
+  background: #fff0c7;
+  box-shadow:
+    0 0 10px rgba(232, 200, 154, 0.52),
+    0 0 20px rgba(128, 174, 188, 0.16);
+  transform: var(--label-dot-translate) scale(var(--label-dot-scale));
+  transition:
+    opacity var(--ease-fast),
+    transform var(--ease-fast);
+}
+
+.section-label-text {
+  display: inline-block;
+}
+
+.section-label-char {
+  display: inline-block;
+  transform-origin: 50% 70%;
+  will-change: transform, opacity, filter;
+}
+
+.section-label-space {
+  width: 0.45em;
+}
+
+.section-label.is-label-live,
+.section-label.is-title-hovered {
+  --label-dot-opacity: 1;
+  --label-dot-scale: 1;
+  color: #fff0c7;
+  filter: brightness(1.07);
+  text-shadow: 0 0 18px rgba(232, 200, 154, 0.16);
+}
+
+.section-label.is-label-live::before,
+.section-label.is-title-hovered::before {
+  background: linear-gradient(90deg, rgba(128, 174, 188, 0.1), #fff0c7 48%, rgba(232, 200, 154, 0.28));
+  box-shadow: 0 0 18px rgba(232, 200, 154, 0.16);
+  transform: scaleX(1.18);
+}
+
+.section-label.is-label-live::after,
+.section-label.is-title-hovered::after {
+  animation: labelSignalBlink 0.8s steps(2, end) infinite;
+}
+
+@keyframes labelSignalBlink {
+  0%,
+  100% {
+    opacity: 0.38;
+    transform: var(--label-dot-translate) scale(0.72);
+  }
+
+  50% {
+    opacity: 1;
+    transform: var(--label-dot-translate) scale(1);
+  }
+}
+
+.section-title {
+  --title-shine-x: 50%;
+  --title-shine-y: 50%;
+  --title-base: var(--lux-ivory);
+  --title-accent-start: #efd4a2bd;
+  --title-accent-mid: #efd4a2bd;
+  --title-accent-end: #efd4a2bd;
+  --title-shine-size: 118px;
+  --title-em-shine-size: 104px;
+  position: relative;
+  display: inline-block;
+  margin-bottom: 22px;
+  font-size: 4rem;
+  isolation: isolate;
+  transition:
+    filter 0.28s ease,
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.section-title:hover,
+.section-title:focus-visible {
+  background:
+    radial-gradient(
+      circle var(--title-shine-size) at var(--title-shine-x) var(--title-shine-y),
+      var(--title-accent-start) 0%,
+      var(--title-accent-mid) 26%,
+      var(--title-accent-end) 38%,
+      transparent 56%
+    ),
+    linear-gradient(var(--title-base), var(--title-base));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter:
+    brightness(1.04)
+    drop-shadow(0 2px 12px rgba(212, 165, 116, 0.1));
+  transform: none;
+}
+
+.section-title em {
+  --em-shine-x: 50%;
+  --em-shine-y: 50%;
+}
+
+.section-title em.is-shining,
+.section-title em:hover,
+.section-title em:focus-visible {
+  background:
+    radial-gradient(
+      circle var(--title-em-shine-size) at var(--em-shine-x) var(--em-shine-y),
+      #ffffff 0%,
+      #fff8e8 18%,
+      #f5e0b8bd 34%,
+      transparent 52%
+    ),
+    linear-gradient(135deg, var(--lux-accent-soft) 0%, var(--lux-champagne) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.lux-section--cinematic .section-title {
+  --title-shine-size: 126px;
+  --title-em-shine-size: 112px;
+}
+
+.lux-section--calm .section-title {
+  --title-shine-size: 110px;
+  --title-em-shine-size: 96px;
+}
+
+.lux-section--services .section-title {
+  --title-shine-size: 112px;
+  --title-em-shine-size: 98px;
+}
+
+.lux-section--process .section-title {
+  --title-shine-size: 110px;
+  --title-em-shine-size: 94px;
+}
+
+.lux-section--feature .section-title {
+  --title-shine-size: 126px;
+  --title-em-shine-size: 112px;
+}
+
+.lux-section--showcase .section-title {
+  --title-shine-size: 114px;
+  --title-em-shine-size: 100px;
+}
+
+.lux-section--return .section-title {
+  --title-shine-size: 122px;
+  --title-em-shine-size: 108px;
+}
+
+.section-title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -8px;
+  width: 100%;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(212, 165, 116, 0.14), var(--lux-champagne), rgba(162, 123, 91, 0.84));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.section-title.underline-visible::after {
+  transform: scaleX(1);
+}
+
+@media (min-width: 960px) {
+  .lux-section:not(.lux-section--cinematic) > .container {
+    padding-left: 58px;
+  }
+
+  .lux-section .section-label {
+    --label-dot-translate: translateX(50%);
+    position: absolute;
+    top: 4px;
+    left: 0;
+    margin: 0;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+  }
+
+  .lux-section .section-label::before {
+    width: 1px;
+    height: 44px;
+  }
+
+  .lux-section .section-label::after {
+    top: -12px;
+    right: 50%;
+  }
+
+  .lux-section .section-label.is-label-live::before,
+  .lux-section .section-label.is-title-hovered::before {
+    transform: scaleY(1.18);
+  }
+}
+
+.orb {
+  position: absolute;
+  z-index: 1;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  opacity: 0.68;
+}
+
+.orb-a {
+  background: rgba(198, 154, 120, 0.2);
+}
+
+.orb-b {
+  background: rgba(128, 174, 188, 0.14);
+}
+
+.orb-c {
+  background: rgba(232, 226, 214, 0.08);
+}
+
+.lux-section:not(.hero) > .orb {
+  --orb-size: clamp(720px, 54vw, 1040px);
+  --orb-x: 50%;
+  --orb-y: 50%;
+  --orb-core: rgba(185, 166, 138, 0.064);
+  --orb-aura: rgba(126, 152, 158, 0.026);
+  --orb-edge: rgba(232, 226, 214, 0.014);
+  width: var(--orb-size);
+  height: var(--orb-size);
+  top: var(--orb-y);
+  left: var(--orb-x);
+  right: auto;
+  bottom: auto;
+  opacity: 0.22;
+  background:
+    radial-gradient(circle at 50% 50%, var(--orb-core) 0%, var(--orb-aura) 42%, var(--orb-edge) 58%, transparent 76%);
+  filter: blur(176px) saturate(0.84);
+  mix-blend-mode: screen;
+  transform: translate(-50%, -50%) translateZ(0);
+}
+
+.lux-section:not(.hero) > .orb-a {
+  --orb-core: rgba(185, 166, 138, 0.066);
+  --orb-aura: rgba(126, 152, 158, 0.024);
+}
+
+.lux-section:not(.hero) > .orb-b {
+  --orb-core: rgba(126, 152, 158, 0.06);
+  --orb-aura: rgba(185, 166, 138, 0.026);
+}
+
+.lux-section:not(.hero) > .orb-c {
+  --orb-core: rgba(210, 200, 181, 0.052);
+  --orb-aura: rgba(126, 152, 158, 0.022);
+}

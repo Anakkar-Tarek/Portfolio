@@ -1,0 +1,29 @@
+:root {
+  --lux-bg-deep: #050a10;
+  --lux-bg-mid: #08121b;
+  --lux-bg-soft: #0d1b24;
+  --lux-ivory: #eee7da;
+  --lux-muted: rgba(232, 226, 214, 0.72);
+  --lux-muted-soft: rgba(184, 176, 162, 0.58);
+  --lux-champagne: #e8c99a;
+  --lux-accent: #c79a6c;
+  --lux-accent-soft: #d6b890;
+  --lux-line: rgba(214, 184, 152, 0.14);
+  --lux-line-strong: rgba(214, 184, 152, 0.28);
+  --lux-surface: #081017;
+  --lux-surface-strong: #081017;
+  --lux-shadow-card: 0 20px 56px rgba(0, 0, 0, 0.28);
+  --lux-shadow-card-hover: 0 30px 74px rgba(0, 0, 0, 0.38);
+  --lux-glow-warm: rgba(198, 154, 120, 0.13);
+  --lux-glow-cool: rgba(128, 174, 188, 0.08);
+  --ease: 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-fast: 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  --font-heading: "Montserrat", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-brand: "Syne", sans-serif;
+  --font-num: "DM Mono", monospace;
+  --font-editorial: "Cormorant Garamond", serif;
+  --font-title-alt: var(--font-heading);
+  --font-numeric-lux: "DM Serif Display", serif;
+  --font-button: var(--font-body);
+}

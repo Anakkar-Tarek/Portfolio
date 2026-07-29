@@ -1,0 +1,129 @@
+.stat-item,
+.service-card,
+.step,
+.step-index,
+.ba-slider,
+.ba-compare-bar,
+.ba-compare-col,
+.contact-link,
+.contact-form-panel,
+.templates-viewport,
+.template-media {
+  position: relative;
+  z-index: 2;
+  isolation: isolate;
+  contain: paint;
+  border: 1px solid var(--lux-line);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.038) 0%, rgba(255, 255, 255, 0.012) 100%),
+    var(--lux-surface);
+  box-shadow:
+    var(--lux-shadow-card),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.stat-item,
+.service-card,
+.contact-link,
+.contact-form-panel,
+.templates-viewport {
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.particle-shield {
+  --particle-shield-bg: #081017;
+  --particle-shield-background: var(--particle-shield-bg);
+  --particle-shield-border: rgba(232, 226, 214, 0.075);
+  --particle-shield-shadow: none;
+  --particle-shield-z: auto;
+  isolation: isolate;
+  z-index: var(--particle-shield-z) !important;
+  opacity: 1;
+  mix-blend-mode: normal;
+  background: var(--particle-shield-background) !important;
+  background-color: var(--particle-shield-bg) !important;
+  border-color: var(--particle-shield-border) !important;
+  box-shadow: var(--particle-shield-shadow) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.stat-item {
+  padding: 18px 20px;
+  border-radius: 8px;
+  transition:
+    transform var(--ease),
+    border-color var(--ease),
+    box-shadow var(--ease),
+    filter var(--ease-fast);
+}
+
+.stat-item:hover {
+  transform: translateY(-3px);
+  border-color: var(--lux-line-strong);
+  filter: brightness(1.03);
+  box-shadow:
+    var(--lux-shadow-card-hover),
+    0 0 32px rgba(162, 123, 91, 0.085),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.stat-num {
+  margin-bottom: 7px;
+  font-family: var(--font-numeric-lux) !important;
+  font-size: 3rem;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
+.stat-label,
+.contact-link-label,
+.form-field label,
+.ba-c-name,
+.ba-c-period,
+.counter-desc {
+  color: var(--lux-muted-soft);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.stat-label {
+  font-size: 0.68rem;
+}
+
+.about-body p,
+.transform-body p,
+.step-body p,
+.service-card p,
+.services-intro,
+.help-intro,
+.contact-tagline,
+.templates-intro p,
+.template-description,
+.form-header p,
+.form-success p {
+  color: var(--lux-muted);
+}
+
+.about-body p,
+.transform-body p {
+  margin: 0 0 20px;
+  font-size: 1rem;
+  line-height: 1.92;
+}
+
+.about-body p:last-child,
+.transform-body p:last-child {
+  margin-bottom: 0;
+}
+
+.about-body strong,
+.transform-body strong {
+  color: var(--lux-ivory);
+  font-weight: 500;
+}

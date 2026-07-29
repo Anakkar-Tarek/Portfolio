@@ -3,12 +3,12 @@ export interface Props {
   title?: string;
   description?: string;
 }
+
 const {
   title = "Fadoua Badih — Digital Marketing & Brand Strategist",
   description = "Digital marketing and brand strategy for stronger online presence through strategy, content production, and brand storytelling."
 } = Astro.props;
 const SITE_URL = "https://fadouabadih.com/";
-const OG_IMAGE_URL = `${SITE_URL}og-image.png`;
 ---
 <!doctype html>
 <html lang="en" class="is-loading">
@@ -21,17 +21,23 @@ const OG_IMAGE_URL = `${SITE_URL}og-image.png`;
   <meta property="og:type" content="website" />
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
-  <meta property="og:image" content={OG_IMAGE_URL} />
   <meta property="og:url" content={SITE_URL} />
   <meta property="og:locale" content="en_US" />
-  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content={title} />
   <meta name="twitter:description" content={description} />
-  <meta name="twitter:image" content={OG_IMAGE_URL} />
   <meta name="theme-color" content="#050a10" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" />
   <style is:global>
     html {
+      background: #050a10;
+      overscroll-behavior-y: none;
       scrollbar-gutter: stable;
+    }
+
+    body {
+      background: #050a10;
+      min-height: 100vh;
     }
 
     html.is-loading,

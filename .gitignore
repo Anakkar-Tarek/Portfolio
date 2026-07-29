@@ -5,6 +5,7 @@ node_modules/
 # Build directories
 /dist/
 /.out/
+/.astro/
 
 # Logs
 *.log
