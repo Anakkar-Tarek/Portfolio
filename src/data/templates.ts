@@ -31,7 +31,7 @@ export const templates = [
     alt: "Retail brand template preview",
   },
   {
-    brand: "Association of Cooperation Tetouan",
+    brand: "ACT Tetouan",
     description: "",
     image: "/images/templates/5.webp",
     alt: "Beauty brand template preview",
@@ -43,7 +43,7 @@ export const templates = [
     alt: "Lifestyle brand template preview",
   },
   {
-    brand: "Bakero",
+    brand: "Bakero Store",
     description: "",
     image: "/images/templates/7.webp",
     alt: "Bakero brand template preview",

@@ -59,7 +59,7 @@ import { serviceInquiryOptions } from "../data/services";
           <p>Thanks for reaching out. I'll get back to you within 24 hours.</p>
         </div>
 
-        <form id="contactForm" name="contact" data-netlify="true" netlify-honeypot="bot-field" novalidate>
+        <form id="contactForm" name="contact" method="POST" action="/" data-netlify="true" netlify-honeypot="bot-field" novalidate>
           <input type="hidden" name="form-name" value="contact" />
           <input type="text" name="bot-field" tabindex="-1" autocomplete="off" style="position:absolute; left:-9999px;" />
           <div class="form-row">

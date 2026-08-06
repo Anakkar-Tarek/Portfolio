@@ -13,12 +13,12 @@
 
   .about-grid {
     grid-template-columns: 1fr 1.4fr;
-    gap: 60px;
+    gap: 42px;
   }
 
   .contact-grid {
     grid-template-columns: 1fr;
-    gap: 52px;
+    gap: 38px;
   }
 }
 
@@ -37,7 +37,7 @@
 
   .step {
     grid-template-columns: 112px minmax(0, 1fr);
-    gap: 24px;
+    gap: 18px;
   }
 
   .step-index {
@@ -51,7 +51,7 @@
 
   .about-grid {
     grid-template-columns: 1fr;
-    gap: 44px;
+    gap: 28px;
   }
 
   .about-body {
@@ -73,13 +73,14 @@
   }
 
   .templates-viewport {
-    min-height: 820px;
-    padding: 42px 0;
+    --template-stack-lift: 0px;
+    min-height: 615px;
+    padding: 16px 0 0;
   }
 
   .templates-track {
-    min-height: 736px;
-    height: 736px;
+    min-height: 600px;
+    height: 600px;
   }
 }
 
@@ -91,7 +92,7 @@
   }
 
   section {
-    --section-y: 76px;
+    --section-y: 58px;
     --section-overlap: 84px;
   }
 
@@ -101,7 +102,7 @@
 
   .lux-section:not(.hero) > .orb {
     --orb-size: clamp(440px, 112vw, 620px);
-    opacity: 0.28;
+    opacity: 0;
     filter: blur(126px) saturate(1.04);
   }
 
@@ -190,8 +191,8 @@
 
   .step {
     grid-template-columns: 1fr;
-    gap: 18px;
-    padding: 24px;
+    gap: 14px;
+    padding: 20px;
   }
 
   .step:hover {
@@ -213,35 +214,40 @@
 
   .ba-slider,
   .ba-labels {
-    width: min(360px, 92vw);
-  }
-
-  .ba-hint-text {
-    display: none;
+    width: min(342px, 92vw);
   }
 
   .templates-showcase {
-    width: min(100%, calc(100vw - 32px));
+    width: min(100%, calc(100vw - 24px));
+  }
+
+  .templates-section {
+    padding-bottom: 12px;
+  }
+
+  .templates-section + .lux-section {
+    padding-top: 28px;
   }
 
   .templates-viewport {
-    --template-card-width: min(82vw, 336px);
-    min-height: 720px;
-    padding: 34px 0;
+    --template-card-width: min(76vw, 304px);
+    --template-stack-lift: 0px;
+    min-height: 530px;
+    padding: 12px 0 0;
   }
 
   .templates-track {
-    min-height: 652px;
-    height: 652px;
+    min-height: 520px;
+    height: 520px;
   }
 
   .template-card {
-    max-width: min(82vw, 358px);
+    max-width: min(76vw, 326px);
   }
 
   .template-brand {
-    font-size: 1.22rem;
-    letter-spacing: 0.14em;
+    font-size: 1rem;
+    letter-spacing: 0.04em;
   }
 
   .template-description {

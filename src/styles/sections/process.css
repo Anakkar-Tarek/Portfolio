@@ -6,7 +6,7 @@
 
 .help-intro {
   max-width: 640px;
-  margin: 0 0 64px;
+  margin: 0 0 34px;
   font-size: 1rem;
   line-height: 1.92;
 }
@@ -19,9 +19,9 @@
 .step {
   display: grid;
   grid-template-columns: 132px minmax(0, 1fr);
-  gap: 42px;
+  gap: 28px;
   align-items: center;
-  padding: 30px;
+  padding: 24px;
   border-radius: 8px;
   transition:
     transform 0.32s ease,

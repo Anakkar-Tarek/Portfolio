@@ -17,6 +17,7 @@ export function init() {
   const afterImg = $("#baImgAfter");
   const compareBar = $("#baCompareBar");
   const compareCols = compareBar ? Array.from(compareBar.querySelectorAll(".ba-compare-col")) : [];
+  const peekButtons = scene ? Array.from(scene.querySelectorAll("[data-ba-peek]")) : [];
   if (!slider || !overlay || !beforeImg || !afterImg) return;
 
   const metricEls = compareBar ? Array.from(compareBar.querySelectorAll(".ba-c-val")) : [];
@@ -38,6 +39,7 @@ export function init() {
   let introDone = false;
   let raf = null;
   const FEATHER = 14;
+  const EDGE_INSET_PX = 8;
 
   function clamp(value, min, max) {
     return Math.min(max, Math.max(min, value));
@@ -46,6 +48,12 @@ export function init() {
   function pctFromClientX(clientX) {
     const rect = slider.getBoundingClientRect();
     return ((clientX - rect.left) / rect.width) * 100;
+  }
+
+  function edgeInsetPct() {
+    const rect = slider.getBoundingClientRect();
+    if (!rect.width) return 1.5;
+    return Math.min(5, (EDGE_INSET_PX / rect.width) * 100);
   }
 
   function ariaValueText(value) {
@@ -103,6 +111,16 @@ export function init() {
     }
   }
 
+  function updatePeekControls(value) {
+    const activeSide = value >= 65 ? "before" : value <= 35 ? "after" : "";
+
+    peekButtons.forEach((button) => {
+      const target = Number(button.dataset.position || 50);
+      const side = target > 50 ? "before" : "after";
+      button.setAttribute("aria-pressed", String(side === activeSide));
+    });
+  }
+
   function renderMetrics(pct) {
     const beforeShare = clamp((pct - 2) / 96, 0, 1);
 
@@ -116,7 +134,8 @@ export function init() {
   }
 
   function setPos(pct, instant = false) {
-    const value = clamp(pct, 0, 100);
+    const inset = edgeInsetPct();
+    const value = clamp(pct, inset, 100 - inset);
     currentPos = value;
 
     if (raf) cancelAnimationFrame(raf);
@@ -136,6 +155,7 @@ export function init() {
       overlay.setAttribute("aria-valuetext", ariaValueText(value));
 
       renderMetrics(value);
+      updatePeekControls(value);
     };
 
     if (instant) {
@@ -213,6 +233,21 @@ export function init() {
     else return;
 
     e.preventDefault();
+  });
+
+  peekButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const target = Number(button.dataset.position);
+      if (!Number.isFinite(target)) return;
+
+      introDone = true;
+      setPos(target);
+      gsap.fromTo(
+        handle,
+        { scaleX: 1.12, scaleY: 0.92 },
+        { scaleX: 1, scaleY: 1, duration: 0.42, ease: "power3.out" }
+      );
+    });
   });
 
   setPos(50, true);

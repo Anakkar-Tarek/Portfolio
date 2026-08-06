@@ -1,5 +1,5 @@
 .services-header {
-  margin-bottom: 56px;
+  margin-bottom: 30px;
 }
 
 .services-intro {
@@ -246,7 +246,8 @@
 }
 
 .service-card:hover .service-arrow,
-.contact-link:hover .contact-link-arrow {
+.contact-link:hover .contact-link-arrow,
+.contact-link:focus-visible .contact-link-arrow {
   opacity: 1;
   transform: translateX(0);
 }

@@ -2,6 +2,9 @@
   --lux-bg-deep: #050a10;
   --lux-bg-mid: #08121b;
   --lux-bg-soft: #0d1b24;
+  --lux-bg-page:
+    linear-gradient(180deg, #050a10 0%, #071019 46%, #05090e 100%);
+  --lux-section-bg-uniform: transparent;
   --lux-ivory: #eee7da;
   --lux-muted: rgba(232, 226, 214, 0.72);
   --lux-muted-soft: rgba(184, 176, 162, 0.58);

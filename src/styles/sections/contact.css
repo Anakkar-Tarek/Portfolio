@@ -8,12 +8,12 @@
 .contact-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(360px, 1.15fr);
-  gap: 80px;
+  gap: 52px;
   align-items: start;
 }
 
 .contact-tagline {
-  margin: 18px 0 36px;
+  margin: 10px 0 24px;
   font-size: 1rem;
   line-height: 1.88;
 }

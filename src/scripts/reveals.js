@@ -167,6 +167,9 @@ function setupSectionLabelMotion() {
       once: true,
       onEnter: () => gsap.delayedCall(0.12, () => playLoad(label)),
     });
+
+    label.addEventListener("pointerenter", () => playHover(label), { passive: true });
+    label.addEventListener("pointerleave", () => label.classList.remove("is-title-hovered"), { passive: true });
   });
 
   $$(".section-title").forEach(title => {

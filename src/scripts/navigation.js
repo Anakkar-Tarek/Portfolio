@@ -75,7 +75,7 @@ function initAnchorScroll(closeMobile, navbar) {
     if (Math.abs(window.scrollY - correctedY) > 2) {
       window.scrollTo({
         top: correctedY,
-        behavior: "auto",
+        behavior: prefersReducedMotion() ? "auto" : "smooth",
       });
     }
     ScrollTrigger.update();
@@ -133,9 +133,10 @@ function initAnchorScroll(closeMobile, navbar) {
 
     const hash = link.getAttribute("href");
     if (!hash || hash === "#") return;
+    if (!document.getElementById(hash.slice(1))) return;
 
+    event.preventDefault();
     if (scrollToHash(hash)) {
-      event.preventDefault();
       closeMobile();
     }
   });

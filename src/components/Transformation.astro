@@ -6,110 +6,163 @@ const { before, after } = transformationResult;
 <section id="transformation" class="lux-section lux-section--feature">
   <div class="orb orb-b transform-orb"></div>
   <div class="container">
+    <div class="transform-layout">
+      <div class="transform-copy">
+        <div class="transform-intro">
+          <div class="section-label">Results</div>
+          <h2 class="section-title">Turn Content Into <em>Real Engagement</em></h2>
+        </div>
 
-    <div class="transform-intro">
-      <div class="section-label">Results</div>
-      <h2 class="section-title">Turn Content Into <em>Real Engagement</em></h2>
-    </div>
+        <div class="transform-body">
+          <p>Through strategic content and thoughtful digital positioning, a social media presence can evolve from limited interaction to a much <strong>stronger and more active audience.</strong></p>
+          <p>My approach focuses on improving how brands communicate online. By combining engaging visual content, storytelling, and strategic targeting, content becomes more discoverable and meaningful.</p>
+          <p>The result is a stronger connection with followers, greater visibility across platforms, and a digital presence that feels consistent and alive.</p>
+        </div>
 
-    <div class="ba-scene" id="baScene">
-      <div class="ba-glow-halo"></div>
+        <div class="ba-compare-bar" id="baCompareBar">
+          <div class="ba-compare-col ba-col-before">
+            <div class="ba-c-header">
+              <span class="ba-c-badge ba-c-badge--start" aria-label="Before">
+                <span class="ba-c-badge-mark" aria-hidden="true">
+                  <svg class="ba-c-icon" viewBox="0 0 24 24" fill="none">
+                    <path d="M7.2 7.4A7 7 0 1 1 5.5 12" />
+                    <path d="M5.2 5.2v4.2h4.2" />
+                    <path d="M12 8.2v4.1l2.9 1.7" />
+                  </svg>
+                </span>
+                <span class="ba-c-badge-text">
+                  <span class="ba-c-badge-label">Before</span>
+                </span>
+              </span>
+              <span class="ba-c-period">{before.period}</span>
+            </div>
+            <div class="ba-c-metrics">
+              {before.metrics.map((metric, index) => (
+                <>
+                  {index > 0 && <div class="ba-c-sep"></div>}
+                  <div class="ba-c-metric">
+                    <span class="ba-c-val" data-count={metric.count} data-format={metric.format}>{metric.count.toLocaleString("en-US")}</span>
+                    <span class="ba-c-name">{metric.label}</span>
+                  </div>
+                </>
+              ))}
+            </div>
+          </div>
 
-      <div class="ba-labels" id="baLabels">
-        <span class="ba-label-before">{before.period}</span>
-        <span class="ba-label-after">{after.period}</span>
-      </div>
-
-      <div class="ba-slider" id="baSlider">
-        <div class="ba-spotlight" id="baSpotlight"></div>
-
-        <img
-          src={after.image}
-          alt={after.alt}
-          class="ba-img ba-img-after"
-          id="baImgAfter"
-          width="1170"
-          height="1580"
-          draggable="false"
-        />
-
-        <img
-          src={before.image}
-          alt={before.alt}
-          class="ba-img ba-img-before"
-          id="baImgBefore"
-          width="1170"
-          height="1580"
-          draggable="false"
-        />
-
-        <div class="ba-divider" id="baDivider" aria-hidden="true">
-          <div class="ba-beam-particles"></div>
-          <div class="ba-handle" id="baHandle">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M9 18l-6-6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M15 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
+          <div class="ba-compare-col ba-col-after">
+            <div class="ba-c-header">
+              <span class="ba-c-badge ba-c-badge--glow ba-c-badge-effect" aria-label="After">
+                <span class="ba-c-badge-mark" aria-hidden="true">
+                  <svg class="ba-c-icon" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 3.8l2 5.2 5.2 2-5.2 2-2 5.2-2-5.2-5.2-2 5.2-2 2-5.2Z" />
+                    <path d="M18.4 4.8v3.1" />
+                    <path d="M16.9 6.35h3.1" />
+                  </svg>
+                </span>
+                <span class="ba-c-badge-text">
+                  <span class="ba-c-badge-label">After</span>
+                </span>
+              </span>
+              <span class="ba-c-period">{after.period}</span>
+            </div>
+            <div class="ba-c-metrics">
+              {after.metrics.map((metric, index) => (
+                <>
+                  {index > 0 && <div class="ba-c-sep"></div>}
+                  <div class="ba-c-metric">
+                    <span class="ba-c-val" data-count={metric.count} data-format={metric.format}>{metric.count.toLocaleString("en-US")}</span>
+                    <span class="ba-c-name">{metric.label}</span>
+                  </div>
+                </>
+              ))}
+            </div>
           </div>
         </div>
-
-        <div
-          class="ba-drag-overlay"
-          id="baDragOverlay"
-          role="slider"
-          aria-label="Drag to compare before and after results"
-          aria-valuenow="50"
-          aria-valuemin="0"
-          aria-valuemax="100"
-          aria-valuetext="50% before image visible"
-          aria-describedby="baSliderInstructions"
-          tabindex="0"
-        ></div>
       </div>
 
-      <p class="sr-only" id="baSliderInstructions">
-        Use Left and Right arrow keys to adjust by 3 percent, Page Up and Page Down by 10 percent, Home for the start, and End for the end.
-      </p>
-      <p class="ba-hint-text" aria-hidden="true">&larr; drag to compare &rarr;</p>
-    </div>
+      <div class="transform-visual">
+        <div class="ba-scene" id="baScene">
+          <div class="ba-glow-halo"></div>
 
-    <div class="ba-compare-bar" id="baCompareBar">
-      <div class="ba-compare-col ba-col-before">
-        <span class="ba-c-period">{before.period}</span>
-        <div class="ba-c-metrics">
-          {before.metrics.map((metric, index) => (
-            <>
-              {index > 0 && <div class="ba-c-sep"></div>}
-              <div class="ba-c-metric">
-                <span class="ba-c-val" data-count={metric.count} data-format={metric.format}>{metric.count.toLocaleString("en-US")}</span>
-                <span class="ba-c-name">{metric.label}</span>
+          <div class="ba-labels" id="baLabels">
+            <span class="ba-label-before">{before.period}</span>
+            <span class="ba-label-after">{after.period}</span>
+          </div>
+
+          <div class="ba-slider" id="baSlider">
+            <div class="ba-spotlight" id="baSpotlight"></div>
+
+            <img
+              src={after.image}
+              alt={after.alt}
+              class="ba-img ba-img-after"
+              id="baImgAfter"
+              width="1170"
+              height="1580"
+              draggable="false"
+            />
+
+            <img
+              src={before.image}
+              alt={before.alt}
+              class="ba-img ba-img-before"
+              id="baImgBefore"
+              width="1170"
+              height="1580"
+              draggable="false"
+            />
+
+            <div class="ba-divider" id="baDivider" aria-hidden="true">
+              <div class="ba-beam-particles"></div>
+              <div class="ba-handle" id="baHandle">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M9 18l-6-6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M15 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
               </div>
-            </>
-          ))}
+            </div>
+
+            <div
+              class="ba-drag-overlay"
+              id="baDragOverlay"
+              role="slider"
+              aria-label="Adjust before and after result split"
+              aria-valuenow="50"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuetext="50% before image visible"
+              aria-describedby="baSliderInstructions"
+              tabindex="0"
+            ></div>
+          </div>
+
+          <p class="sr-only" id="baSliderInstructions">
+            Use the Before and After buttons, or use Left and Right arrow keys to adjust by 3 percent, Page Up and Page Down by 10 percent, Home for the start, and End for the end.
+          </p>
+          <div class="ba-peek-controls" aria-label="Before and after views">
+            <button type="button" class="ba-peek-btn" data-ba-peek data-position="100" aria-pressed="false">
+              <span class="ba-peek-icon ba-peek-icon--before" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M7.2 7.4A7 7 0 1 1 5.5 12" />
+                  <path d="M5.2 5.2v4.2h4.2" />
+                  <path d="M12 8.2v4.1l2.9 1.7" />
+                </svg>
+              </span>
+              <span>Before</span>
+            </button>
+            <button type="button" class="ba-peek-btn" data-ba-peek data-position="0" aria-pressed="false">
+              <span class="ba-peek-icon ba-peek-icon--after" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M12 3.8l2 5.2 5.2 2-5.2 2-2 5.2-2-5.2-5.2-2 5.2-2 2-5.2Z" />
+                  <path d="M18.4 4.8v3.1" />
+                  <path d="M16.9 6.35h3.1" />
+                </svg>
+              </span>
+              <span>After</span>
+            </button>
+          </div>
         </div>
       </div>
-
-      <div class="ba-compare-col ba-col-after">
-        <span class="ba-c-period">{after.period}</span>
-        <div class="ba-c-metrics">
-          {after.metrics.map((metric, index) => (
-            <>
-              {index > 0 && <div class="ba-c-sep"></div>}
-              <div class="ba-c-metric">
-                <span class="ba-c-val" data-count={metric.count} data-format={metric.format}>{metric.count.toLocaleString("en-US")}</span>
-                <span class="ba-c-name">{metric.label}</span>
-              </div>
-            </>
-          ))}
-        </div>
-      </div>
     </div>
-
-    <div class="transform-body">
-      <p>Through strategic content and thoughtful digital positioning, a social media presence can evolve from limited interaction to a much <strong>stronger and more active audience.</strong></p>
-      <p>My approach focuses on improving how brands communicate online. By combining engaging visual content, storytelling, and strategic targeting, content becomes more discoverable and meaningful.</p>
-      <p>The result is a stronger connection with followers, greater visibility across platforms, and a digital presence that feels consistent and alive.</p>
-    </div>
-
   </div>
 </section>

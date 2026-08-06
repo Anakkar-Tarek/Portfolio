@@ -6,7 +6,7 @@
 }
 
 section {
-  --section-y: 104px;
+  --section-y: 72px;
   --section-overlap: 112px;
   position: relative;
   padding: var(--section-y) 0;
@@ -15,16 +15,14 @@ section {
 .lux-section {
   position: relative;
   overflow: hidden;
-  background: var(--lux-section-bg, linear-gradient(180deg, var(--lux-bg-mid), var(--lux-bg-deep)));
+  background: var(--lux-section-bg, var(--lux-section-bg-uniform));
 }
 
 .lux-section + .lux-section {
-  margin-top: calc(var(--section-overlap) * -1);
-  padding-top: calc(var(--section-y) + var(--section-overlap));
-  -webkit-mask-image:
-    linear-gradient(180deg, transparent 0, rgba(0, 0, 0, 0.24) 38px, rgba(0, 0, 0, 0.72) 82px, #000 var(--section-overlap), #000 100%);
-  mask-image:
-    linear-gradient(180deg, transparent 0, rgba(0, 0, 0, 0.24) 38px, rgba(0, 0, 0, 0.72) 82px, #000 var(--section-overlap), #000 100%);
+  margin-top: 0;
+  padding-top: var(--section-y);
+  -webkit-mask-image: none;
+  mask-image: none;
 }
 
 .lux-section > .container {
@@ -33,103 +31,56 @@ section {
 }
 
 .lux-section::before {
-  content: "";
+  content: none;
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle, rgba(232, 200, 154, 0.1) 0 1px, transparent 1.7px),
-    radial-gradient(circle, rgba(128, 174, 188, 0.09) 0 1px, transparent 1.6px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.014) 0 1px, transparent 1px 100%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.012) 0 1px, transparent 1px 100%);
-  background-position: 0 0, 44px 28px, 0 0, 0 0;
-  background-size: 148px 148px, 214px 214px, 96px 96px, 96px 96px;
-  opacity: 0.045;
+  background-position: 0 0, 0 0;
+  background-size: 96px 96px, 96px 96px;
+  opacity: 0.032;
   mask-image: linear-gradient(180deg, transparent 0%, #000 24%, #000 76%, transparent 100%);
 }
 
 .lux-section::after {
-  content: "";
+  content: none;
   position: absolute;
   inset: -12% -8%;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.56;
+  opacity: 0.2;
   background:
-    radial-gradient(ellipse at 50% -4%, rgba(232, 200, 154, 0.045) 0%, transparent 44%),
-    radial-gradient(ellipse at 12% 58%, rgba(128, 174, 188, 0.03) 0%, transparent 35%),
-    radial-gradient(ellipse at 88% 60%, rgba(198, 154, 120, 0.028) 0%, transparent 35%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.012) 0%, transparent 34%, transparent 66%, rgba(5, 10, 16, 0.18) 100%);
-  mix-blend-mode: screen;
+    linear-gradient(180deg, rgba(255, 255, 255, 0.01) 0%, transparent 36%, transparent 64%, rgba(5, 10, 16, 0.16) 100%);
+  mix-blend-mode: normal;
 }
 
-.lux-section--cinematic {
-  --lux-section-bg:
-    radial-gradient(circle at 82% 18%, rgba(198, 154, 120, 0.13) 0%, transparent 28%),
-    radial-gradient(circle at 12% 74%, rgba(52, 102, 121, 0.09) 0%, transparent 30%),
-    linear-gradient(180deg, rgba(6, 13, 20, 0.2) 0%, rgba(7, 14, 21, 0.74) 76%, rgba(8, 16, 23, 0.94) 100%);
-}
-
-.lux-section--cinematic::after {
-  opacity: 0;
+.lux-section--cinematic,
+.lux-section--calm,
+.lux-section--services,
+.lux-section--process,
+.lux-section--feature,
+.lux-section--showcase,
+.lux-section--return {
+  --lux-section-bg: var(--lux-section-bg-uniform);
 }
 
 .lux-section--cinematic::before {
-  opacity: 0.15;
-  background-size: 112px 112px, 176px 176px, 92px 92px, 92px 92px;
+  opacity: 0.04;
+  background-size: 92px 92px, 92px 92px;
   mask-image: linear-gradient(180deg, #000 0%, #000 78%, transparent 100%);
-}
-
-.lux-section--calm {
-  --lux-section-bg:
-    radial-gradient(circle at 15% 20%, rgba(128, 174, 188, 0.075) 0%, transparent 30%),
-    radial-gradient(circle at 86% 10%, rgba(198, 154, 120, 0.072) 0%, transparent 28%),
-    linear-gradient(180deg, #081017 0%, var(--lux-bg-mid) 100%);
-}
-
-.lux-section--services {
-  --lux-section-bg:
-    radial-gradient(circle at 82% 14%, rgba(198, 154, 120, 0.085) 0%, transparent 28%),
-    radial-gradient(circle at 12% 70%, rgba(128, 174, 188, 0.052) 0%, transparent 31%),
-    linear-gradient(145deg, #070e15 0%, var(--lux-bg-soft) 52%, #070d13 100%);
-}
-
-.lux-section--process {
-  --lux-section-bg:
-    radial-gradient(circle at 13% 82%, rgba(128, 174, 188, 0.08) 0%, transparent 28%),
-    radial-gradient(circle at 90% 26%, rgba(198, 154, 120, 0.07) 0%, transparent 31%),
-    linear-gradient(220deg, #09121a 0%, #0d1a24 48%, #081017 100%);
-}
-
-.lux-section--feature {
-  --lux-section-bg:
-    radial-gradient(circle at 50% 18%, rgba(198, 154, 120, 0.17) 0%, transparent 31%),
-    radial-gradient(circle at 18% 72%, rgba(128, 174, 188, 0.07) 0%, transparent 29%),
-    linear-gradient(180deg, #081017 0%, #0c1821 48%, #081017 100%);
-}
-
-.lux-section--showcase {
-  --lux-section-bg:
-    radial-gradient(circle at 50% 8%, rgba(198, 154, 120, 0.12) 0%, transparent 25%),
-    radial-gradient(circle at 14% 78%, rgba(128, 174, 188, 0.068) 0%, transparent 28%),
-    linear-gradient(180deg, #081017 0%, #0a121b 100%);
-}
-
-.lux-section--return {
-  --lux-section-bg:
-    radial-gradient(circle at 20% 12%, rgba(128, 174, 188, 0.095) 0%, transparent 29%),
-    radial-gradient(circle at 78% 20%, rgba(198, 154, 120, 0.11) 0%, transparent 31%),
-    radial-gradient(circle at 50% 86%, rgba(126, 152, 158, 0.035) 0%, transparent 34%),
-    linear-gradient(180deg, #081017 0%, #070d13 58%, #05090e 100%);
 }
 
 .section-label {
   position: relative;
-  display: inline-flex;
+  display: flex;
+  width: max-content;
+  max-width: 100%;
   align-items: center;
   gap: 12px;
-  margin-bottom: 18px;
+  margin-bottom: 10px;
   --label-dot-scale: 0.35;
   --label-dot-opacity: 0;
   --label-dot-translate: translateY(-50%);
@@ -239,7 +190,7 @@ section {
   --title-em-shine-size: 104px;
   position: relative;
   display: inline-block;
-  margin-bottom: 22px;
+  margin-bottom: 14px;
   font-size: 4rem;
   isolation: isolate;
   transition:
@@ -344,32 +295,32 @@ section {
 
 @media (min-width: 960px) {
   .lux-section:not(.lux-section--cinematic) > .container {
-    padding-left: 58px;
+    padding-left: 0;
   }
 
   .lux-section .section-label {
-    --label-dot-translate: translateX(50%);
-    position: absolute;
-    top: 4px;
-    left: 0;
-    margin: 0;
-    writing-mode: vertical-rl;
-    transform: rotate(180deg);
+    --label-dot-translate: translateY(-50%);
+    position: relative;
+    top: auto;
+    left: auto;
+    margin-bottom: 10px;
+    writing-mode: horizontal-tb;
+    transform: none;
   }
 
   .lux-section .section-label::before {
-    width: 1px;
-    height: 44px;
+    width: 30px;
+    height: 1px;
   }
 
   .lux-section .section-label::after {
-    top: -12px;
-    right: 50%;
+    top: 50%;
+    right: -12px;
   }
 
   .lux-section .section-label.is-label-live::before,
   .lux-section .section-label.is-title-hovered::before {
-    transform: scaleY(1.18);
+    transform: scaleX(1.18);
   }
 }
 
@@ -379,7 +330,8 @@ section {
   border-radius: 50%;
   filter: blur(120px);
   pointer-events: none;
-  opacity: 0.68;
+  opacity: 0;
+  visibility: hidden;
 }
 
 .orb-a {
@@ -407,7 +359,7 @@ section {
   left: var(--orb-x);
   right: auto;
   bottom: auto;
-  opacity: 0.22;
+  opacity: 0;
   background:
     radial-gradient(circle at 50% 50%, var(--orb-core) 0%, var(--orb-aura) 42%, var(--orb-edge) 58%, transparent 76%);
   filter: blur(176px) saturate(0.84);
