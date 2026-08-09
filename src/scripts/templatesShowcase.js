@@ -9,13 +9,14 @@ export function init() {
   const total = cards.length;
   if (!total) return;
 
-  const SLIDE_SPEED = 0.18;
-  const HOVER_PAUSE_MS = 2000;
+  const SLIDE_SPEED = 0.15;
+  const HOVER_PAUSE_MS = 800;
   const MOMENTUM_FACTOR = 8.5;
   const MAX_MOMENTUM_SLIDES = 1.2;
   const MAX_FRAME_DELTA = 32;
   const DRAG_START_THRESHOLD = 8;
-  const DRAG_EASE = 0.48;
+  const DRAG_EASE = 5;
+  const CLICK_PAUSE_MS = 50;
   let step = 320;
   let rafId = 0;
   let isRunning = false;
@@ -24,6 +25,8 @@ export function init() {
   let activeIndex = -1;
   let hoveredIndex = -1;
   let hoverPauseTimer = 0;
+  let clickPauseTimer = 0;
+  let pendingClickPause = false;
   let hoverPauseExpired = false;
   let autoDirection = 1;
   const state = {
@@ -62,10 +65,27 @@ export function init() {
     return value * value * (3 - 2 * value);
   }
 
-  function moveToward(current, target, amount) {
-    const distance = target - current;
-    if (Math.abs(distance) <= amount) return target;
-    return current + Math.sign(distance) * amount;
+  function depthForDistance(value) {
+    return smoothstep(clamp(Math.abs(value) / 2.65, 0, 1));
+  }
+
+  function scaleForDistance(value) {
+    const scaleDepth = smoothstep(clamp(Math.abs(value) / 2.35, 0, 1));
+    return 0.45 + (1 - scaleDepth) * 0.75;
+  }
+
+  function xForDistance(distance) {
+    const absDistance = Math.abs(distance);
+    const side = Math.sign(distance);
+    if (!side) return 0;
+
+    const innerDistance = Math.min(absDistance, 1.08);
+    const outerDistance = Math.max(absDistance - innerDistance, 0);
+    const squeeze = smoothstep(clamp((absDistance - 1.08) / 1.92, 0, 1));
+    const innerX = innerDistance * step * 1.03;
+    const outerStep = step * (0.54 - squeeze * 0.18);
+
+    return side * (innerX + outerDistance * outerStep);
   }
 
   function setAutoDirection(delta) {
@@ -77,6 +97,23 @@ export function init() {
     if (!hoverPauseTimer) return;
     window.clearTimeout(hoverPauseTimer);
     hoverPauseTimer = 0;
+  }
+
+  function clearClickPauseTimer() {
+    pendingClickPause = false;
+    if (!clickPauseTimer) return;
+    window.clearTimeout(clickPauseTimer);
+    clickPauseTimer = 0;
+  }
+
+  function scheduleClickPause() {
+    if (!pendingClickPause || clickPauseTimer) return;
+    pendingClickPause = false;
+    clickPauseTimer = window.setTimeout(() => {
+      clickPauseTimer = 0;
+      state.target = state.position;
+      startTick();
+    }, CLICK_PAUSE_MS);
   }
 
   function recalc() {
@@ -102,41 +139,33 @@ export function init() {
   function updateCardStyles() {
     const nextActiveIndex = wrapIndex(Math.round(state.position));
     syncActiveState(nextActiveIndex);
-    const hoveredDistance = hoveredIndex >= 0 ? shortestDistance(hoveredIndex, state.position) : 0;
-    const hoveredAbsDistance = Math.abs(hoveredDistance);
-    const hoveredSide = Math.sign(hoveredDistance);
-    const hoveredSecondAway = hoveredIndex >= 0 && hoveredAbsDistance >= 1.65 && hoveredAbsDistance < 2.55;
 
     cards.forEach((card, index) => {
       const distance = shortestDistance(index, state.position);
       const absDistance = Math.abs(distance);
-      const depth = smoothstep(clamp(absDistance / 2.65, 0, 1));
+      const depth = depthForDistance(distance);
       const focus = 0.12 + (1 - smoothstep(clamp(absDistance / 1.65, 0, 1))) * 0.88;
-      const x = distance * step * (1.03 - depth * 0.025);
+      const x = xForDistance(distance);
       const y = Math.pow(depth, 1.28) * 20;
       const z = 22 + Math.pow(focus, 1.32) * 228;
       const rotateY = distance * -8.6 * (0.68 + 0.24 * depth);
       const rotateX = 4.5;
-      const isHovered = index === hoveredIndex;
-      const baseScale = 0.84 + focus * 0.2;
-      const scale = isHovered ? baseScale * 1.06 : baseScale;
+      const isActive = index === nextActiveIndex;
+      const isHoverColorable = absDistance < 1.72;
+      const baseScale = scaleForDistance(distance);
+      const scale = baseScale;
       const naturalOpacity = 0.36 + focus * 0.64;
-      const isHoveredSecondAway = isHovered && hoveredSecondAway;
-      const isBridgeToHoveredSecond =
-        hoveredSecondAway &&
-        !isHovered &&
-        hoveredSide !== 0 &&
-        Math.sign(distance) === hoveredSide &&
-        absDistance > 0.55 &&
-        absDistance < 1.55;
-      const opacity = isHovered
-        ? (isHoveredSecondAway ? naturalOpacity : 1)
-        : (isBridgeToHoveredSecond ? Math.max(naturalOpacity, 0.78) : naturalOpacity);
+      const opacity = isActive || absDistance < 0.78
+        ? 1
+        : naturalOpacity;
+      const titleAlpha = 0.56 + focus * 0.36;
+      const titleShadowAlpha = 0.16 + focus * 0.1;
+      const stackOrder = Math.max(0, 10000 - Math.round(absDistance * 1000));
 
-      card.classList.toggle("is-second-away", absDistance >= 1.65 && absDistance < 2.55);
-      card.classList.toggle("is-hovered-second-away", isHoveredSecondAway);
-      card.classList.toggle("is-bridge-to-hover", isBridgeToHoveredSecond);
-      card.style.zIndex = isHovered ? "1400" : String(1000 - Math.round(absDistance * 120));
+      card.classList.toggle("is-hover-colorable", isHoverColorable);
+      card.style.setProperty("--template-title-color", `rgba(226, 232, 240, ${titleAlpha.toFixed(3)})`);
+      card.style.setProperty("--template-title-shadow-alpha", titleShadowAlpha.toFixed(3));
+      card.style.zIndex = String(stackOrder + (isActive ? 1000 : 0));
       card.style.opacity = opacity.toFixed(3);
       card.style.transform = `translate3d(calc(-50% + ${x.toFixed(2)}px), calc(-50% + ${y.toFixed(2)}px), ${z}px) rotateX(${rotateX}deg) rotateY(${rotateY.toFixed(2)}deg) scale(${scale.toFixed(3)})`;
     });
@@ -148,6 +177,8 @@ export function init() {
 
   function canIdleAutoplay() {
     return !state.tracking &&
+      !pendingClickPause &&
+      !clickPauseTimer &&
       isIntersecting &&
       !hasPendingMotion() &&
       (hoveredIndex < 0 || hoverPauseExpired);
@@ -175,38 +206,37 @@ export function init() {
     updateCardStyles();
   }
 
-  const SETTLE_RATE = 12.5; // higher = snappier settle, lower = floatier
+  const SETTLE_RATE = 12.5;
 
-function tick(now) {
-  if (!isRunning) return;
-  if (!shouldRunFrame()) {
-    rafId = 0;
-    isRunning = false;
-    return;
-  }
-
-  const deltaSeconds = Math.min(now - lastFrameTime, MAX_FRAME_DELTA) / 1000;
-  lastFrameTime = now;
-
-  if (state.dragging) {
-    const dragFollow = 1 - Math.exp(-DRAG_EASE * 60 * deltaSeconds);
-    state.position += (state.target - state.position) * dragFollow;
-  } else if (canIdleAutoplay()) {
-    // pure idle glide — constant speed, no easing needed, target IS position
-    state.target += SLIDE_SPEED * deltaSeconds * autoDirection;
-    state.position = state.target;
-  } else {
-    // settling after drag/focus/hover-release — real decelerating ease
-    const settleFollow = 1 - Math.exp(-SETTLE_RATE * deltaSeconds);
-    state.position += (state.target - state.position) * settleFollow;
-    if (Math.abs(state.target - state.position) < 0.001) {
-      state.position = state.target;
+  function tick(now) {
+    if (!isRunning) return;
+    if (!shouldRunFrame()) {
+      rafId = 0;
+      isRunning = false;
+      return;
     }
-  }
 
-  updateCardStyles();
-  rafId = window.requestAnimationFrame(tick);
-} 
+    const deltaSeconds = Math.min(now - lastFrameTime, MAX_FRAME_DELTA) / 1000;
+    lastFrameTime = now;
+
+    if (state.dragging) {
+      const dragFollow = 1 - Math.exp(-DRAG_EASE * 60 * deltaSeconds);
+      state.position += (state.target - state.position) * dragFollow;
+    } else if (canIdleAutoplay()) {
+      state.target += SLIDE_SPEED * deltaSeconds * autoDirection;
+      state.position = state.target;
+    } else {
+      const settleFollow = 1 - Math.exp(-SETTLE_RATE * deltaSeconds);
+      state.position += (state.target - state.position) * settleFollow;
+      if (Math.abs(state.target - state.position) < 0.001) {
+        state.position = state.target;
+        scheduleClickPause();
+      }
+    }
+
+    updateCardStyles();
+    rafId = window.requestAnimationFrame(tick);
+  }
 
   function snapToNearest(extraShift = 0) {
     state.target = Math.round(state.target + extraShift);
@@ -232,6 +262,7 @@ function tick(now) {
   function onPointerDown(event) {
     if (event.button && event.button !== 0) return;
     clearHoverPauseTimer();
+    clearClickPauseTimer();
     hoverPauseExpired = true;
     state.target = state.position;
     state.tracking = true;
@@ -300,12 +331,26 @@ function tick(now) {
 
   function focusCard(index) {
     clearHoverPauseTimer();
+    clearClickPauseTimer();
     hoverPauseExpired = true;
     const shift = shortestDistance(index, state.position);
     setAutoDirection(shift);
-    state.target = Math.round(state.position + shift);
-    if (prefersReducedMotion()) renderInteractionFrame();
-    else startTick();
+    state.target = state.position + shift;
+    pendingClickPause = true;
+
+    if (Math.abs(shift) < 0.001) {
+      state.target = state.position;
+      updateCardStyles();
+      scheduleClickPause();
+      return;
+    }
+
+    if (prefersReducedMotion()) {
+      renderInteractionFrame();
+      scheduleClickPause();
+    } else {
+      startTick();
+    }
   }
 
   function onResize() {
@@ -337,6 +382,7 @@ function tick(now) {
     if (!shift) return;
 
     event.preventDefault();
+    clearClickPauseTimer();
     setAutoDirection(shift);
     state.target += shift;
     if (prefersReducedMotion()) renderInteractionFrame();
@@ -409,6 +455,7 @@ function tick(now) {
 
   window.addEventListener("beforeunload", () => {
     clearHoverPauseTimer();
+    clearClickPauseTimer();
     stopTick();
     cleanupIntersection();
   }, { passive: true });
