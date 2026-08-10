@@ -6,9 +6,9 @@ export function init({ onExit } = {}) {
   const preloader  = $("#preloader");
   const bar        = $(".preloader-bar");
   const counterEls = $$(".counter-val");
-  const PRELOADER_DURATION = 2500;
-  const EXIT_DURATION = 1050;
-  const FAST_PRELOADER_DURATION = 300;
+  const PRELOADER_DURATION = 1100;
+  const EXIT_DURATION = 550;
+  const FAST_PRELOADER_DURATION = 400;
   const VISITED_KEY = "fb_visited";
 
   function getVisitedFlag() {

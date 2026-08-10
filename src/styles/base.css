@@ -148,6 +148,39 @@ html.is-scrollbar-revealing::-webkit-scrollbar-thumb {
   mix-blend-mode: screen;
 }
 
+.cursor-trail-circle {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+  background:
+    radial-gradient(circle at 34% 30%, rgba(238, 231, 218, 0.9), rgba(232, 201, 154, 0.48) 38%, rgba(199, 154, 108, 0.2) 62%, rgba(128, 174, 188, 0.08) 74%, transparent 82%);
+  box-shadow:
+    0 0 10px rgba(232, 201, 154, 0.22),
+    0 0 22px rgba(198, 154, 120, 0.14),
+    0 0 28px rgba(128, 174, 188, 0.06);
+  mix-blend-mode: screen;
+  transform: translate3d(-36px, -36px, 0) scale(0.1);
+  filter: brightness(calc(1 + var(--trail-energy, 0) * 0.22));
+  transition: opacity 180ms ease;
+  will-change: transform, opacity, filter;
+}
+
+.cursor-trail-circle.is-visible {
+  opacity: var(--trail-opacity, 0.5);
+}
+
+@media (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .cursor-trail-circle {
+    display: none;
+  }
+}
+
 h1,
 h2,
 h3,

@@ -73,14 +73,15 @@
   }
 
   .templates-viewport {
+    --template-track-height: 640px;
     --template-stack-lift: 0px;
-    min-height: 615px;
+    min-height: calc(var(--template-track-height) + 24px);
     padding: 16px 0 0;
   }
 
   .templates-track {
-    min-height: 600px;
-    height: 600px;
+    min-height: var(--template-track-height);
+    height: var(--template-track-height);
   }
 }
 
@@ -230,15 +231,17 @@
   }
 
   .templates-viewport {
-    --template-card-width: min(76vw, 304px);
+    --template-card-width: min(60vw, 232px);
+    --template-media-height: min(93.9vw, 375px);
+    --template-track-height: 560px;
     --template-stack-lift: 0px;
-    min-height: 530px;
+    min-height: calc(var(--template-track-height) + 20px);
     padding: 12px 0 0;
   }
 
   .templates-track {
-    min-height: 520px;
-    height: 520px;
+    min-height: var(--template-track-height);
+    height: var(--template-track-height);
   }
 
   .template-card {

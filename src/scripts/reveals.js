@@ -44,10 +44,12 @@ function batchReveal(selector, from = {}, to = {}, opts = {}) {
   });
 }
 
-function setupSectionLabelMotion() {
+function setupSectionSubtitleMotion() {
   const labels = $$(".section-label");
   if (!labels.length) return;
 
+  // Keeps scroll jitter from replaying the subtitle glow too aggressively.
+  const SUBTITLE_GLOW_COOLDOWN_MS = 1400;
   const labelData = new WeakMap();
 
   function splitLabel(label) {
@@ -72,29 +74,43 @@ function setupSectionLabelMotion() {
     label.append(textWrap);
 
     const data = {
+      activeTimeline: null,
       chars: Array.from(textWrap.querySelectorAll(".section-label-char")),
       label,
+      lastGlowAt: 0,
     };
     labelData.set(label, data);
     return data;
   }
 
-  function playLoad(label) {
+  function stopSubtitleAnimation(data) {
+    if (!data.activeTimeline) return;
+    data.activeTimeline.kill();
+    data.activeTimeline = null;
+  }
+
+  function playViewportGlow(label) {
     const data = splitLabel(label);
+    const now = performance.now();
+
+    if (now - data.lastGlowAt < SUBTITLE_GLOW_COOLDOWN_MS) return;
+    data.lastGlowAt = now;
 
     if (prefersReducedMotion()) {
+      label.classList.remove("is-label-live");
       gsap.set(data.chars, { autoAlpha: 1, clearProps: "transform,filter" });
       return;
     }
 
-    gsap.killTweensOf(data.chars);
+    stopSubtitleAnimation(data);
     label.classList.add("is-label-live");
 
-    gsap.timeline({
+    data.activeTimeline = gsap.timeline({
       defaults: { ease: "expo.out" },
       onComplete: () => {
         label.classList.remove("is-label-live");
         gsap.set(data.chars, { clearProps: "transform,opacity,visibility,filter,color,willChange" });
+        data.activeTimeline = null;
       },
     })
       .set(data.chars, {
@@ -129,12 +145,16 @@ function setupSectionLabelMotion() {
     const data = splitLabel(label);
     if (prefersReducedMotion()) return;
 
-    gsap.killTweensOf(data.chars);
+    stopSubtitleAnimation(data);
+    label.classList.remove("is-label-live");
     label.classList.add("is-title-hovered");
 
-    gsap.timeline({
+    data.activeTimeline = gsap.timeline({
       defaults: { ease: "power3.out" },
-      onComplete: () => gsap.set(data.chars, { clearProps: "transform,filter,color,willChange" }),
+      onComplete: () => {
+        gsap.set(data.chars, { clearProps: "transform,filter,color,willChange" });
+        data.activeTimeline = null;
+      },
     })
       .to(data.chars, {
         color: "#fff3d9",
@@ -158,18 +178,33 @@ function setupSectionLabelMotion() {
       });
   }
 
-  labels.forEach(label => {
+  function setupSubtitleViewportAnimation(label) {
     splitLabel(label);
 
-    ScrollTrigger.create({
-      trigger: label.closest("section") || label,
-      start: "top 86%",
-      once: true,
-      onEnter: () => gsap.delayedCall(0.12, () => playLoad(label)),
-    });
+    function playWhenVisible() {
+      const rect = label.getBoundingClientRect();
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+      if (rect.bottom <= 0 || rect.top >= viewportHeight) return;
+      playViewportGlow(label);
+    }
 
+    ScrollTrigger.create({
+      trigger: label,
+      start: "top 86%",
+      end: "bottom top",
+      onEnter: () => gsap.delayedCall(0.12, playWhenVisible),
+      onEnterBack: () => gsap.delayedCall(0.12, playWhenVisible),
+    });
+  }
+
+  function setupSubtitleHoverAnimation(label) {
     label.addEventListener("pointerenter", () => playHover(label), { passive: true });
     label.addEventListener("pointerleave", () => label.classList.remove("is-title-hovered"), { passive: true });
+  }
+
+  labels.forEach(label => {
+    setupSubtitleViewportAnimation(label);
+    setupSubtitleHoverAnimation(label);
   });
 
   $$(".section-title").forEach(title => {
@@ -181,6 +216,17 @@ function setupSectionLabelMotion() {
     title.addEventListener("focusin", () => playHover(label));
     title.addEventListener("focusout", () => label.classList.remove("is-title-hovered"));
   });
+}
+
+function setupSectionTitleUnderlineLoadEffects() {
+  $$(".section-title").forEach(el =>
+    ScrollTrigger.create({
+      trigger: el,
+      start: "top 80%",
+      once: true,
+      onEnter: () => el.classList.add("underline-visible"),
+    })
+  );
 }
 
 function initServiceCards() {
@@ -241,7 +287,7 @@ function initMagnetic() {
 }
 
 export function init() {
-  setupSectionLabelMotion();
+  setupSectionSubtitleMotion();
 
   batchReveal("#about .section-label, #about .section-title, #about .stat-item, #about .about-body p");
   batchReveal("#services .section-label, #services .section-title, #services .services-intro");
@@ -265,12 +311,7 @@ export function init() {
       scrollTrigger: { trigger: ".contact-form-panel", start: "top 85%", once: true } }
   );
 
-  $$(".section-title").forEach(el =>
-    ScrollTrigger.create({
-      trigger: el, start: "top 80%", once: true,
-      onEnter: () => el.classList.add("underline-visible"),
-    })
-  );
+  setupSectionTitleUnderlineLoadEffects();
 
   initMagnetic();
 }

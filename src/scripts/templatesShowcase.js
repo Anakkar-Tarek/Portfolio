@@ -17,6 +17,7 @@ export function init() {
   const DRAG_START_THRESHOLD = 8;
   const DRAG_EASE = 5;
   const CLICK_PAUSE_MS = 50;
+  const TEMPLATE_IMAGE_RATIO = 1334 / 1080;
   let step = 320;
   let rafId = 0;
   let isRunning = false;
@@ -29,6 +30,17 @@ export function init() {
   let pendingClickPause = false;
   let hoverPauseExpired = false;
   let autoDirection = 1;
+  let resizeRafId = 0;
+  let viewportWidth = 0;
+  const renderState = cards.map(() => ({
+    hoverColorable: null,
+    opacity: "",
+    pointerEvents: "",
+    titleColor: "",
+    titleShadowAlpha: "",
+    transform: "",
+    zIndex: "",
+  }));
   const state = {
     position: 0,
     target: 0,
@@ -41,6 +53,7 @@ export function init() {
     lastX: 0,
     lastTime: 0,
     velocity: 0,
+    dragDirection: 0,
     moved: false,
   };
 
@@ -70,8 +83,10 @@ export function init() {
   }
 
   function scaleForDistance(value) {
-    const scaleDepth = smoothstep(clamp(Math.abs(value) / 2.35, 0, 1));
-    return 0.45 + (1 - scaleDepth) * 0.75;
+    const outerScale = 0.45;
+    const centerScale = 1.08;
+    const scaleProgress = 1 - clamp(Math.abs(value) / 2.85, 0, 1);
+    return outerScale + smoothstep(scaleProgress) * (centerScale - outerScale);
   }
 
   function xForDistance(distance) {
@@ -79,13 +94,15 @@ export function init() {
     const side = Math.sign(distance);
     if (!side) return 0;
 
-    const innerDistance = Math.min(absDistance, 1.08);
-    const outerDistance = Math.max(absDistance - innerDistance, 0);
-    const squeeze = smoothstep(clamp((absDistance - 1.08) / 1.92, 0, 1));
-    const innerX = innerDistance * step * 1.03;
-    const outerStep = step * (0.54 - squeeze * 0.18);
+    const centerLane = 1.12;
+    const innerDistance = Math.min(absDistance, centerLane);
+    const outerDistance = Math.max(absDistance - centerLane, 0);
+    const squeeze = smoothstep(clamp((absDistance - centerLane) / 1.86, 0, 1));
+    const innerX = innerDistance * step * 0.86;
+    const outerStep = step * (0.5 - squeeze * 0.14);
+    const seamDrift = smoothstep(clamp((absDistance - 2.35) / 1.05, 0, 1)) * step * 0.16;
 
-    return side * (innerX + outerDistance * outerStep);
+    return side * (innerX + outerDistance * outerStep + seamDrift);
   }
 
   function setAutoDirection(delta) {
@@ -118,10 +135,18 @@ export function init() {
 
   function recalc() {
     const width = viewport.clientWidth;
+    if (Math.abs(width - viewportWidth) < 1) return false;
+
+    viewportWidth = width;
     step = clamp(width * 0.292, 220, 338);
-    const maxCardWidth = clamp(width * 0.314, 238, 362);
+    const baseCardWidth = clamp(width * 0.314, 238, 362);
+    const widthTrim = clamp(width * 0.055, 60, 72);
+    const maxCardWidth = baseCardWidth - widthTrim;
+    const mediaHeight = baseCardWidth * TEMPLATE_IMAGE_RATIO;
     viewport.style.setProperty("--template-step", `${step}px`);
     viewport.style.setProperty("--template-card-width", `${maxCardWidth}px`);
+    viewport.style.setProperty("--template-media-height", `${mediaHeight}px`);
+    return true;
   }
 
   function syncActiveState(nextActiveIndex) {
@@ -139,6 +164,9 @@ export function init() {
   function updateCardStyles() {
     const nextActiveIndex = wrapIndex(Math.round(state.position));
     syncActiveState(nextActiveIndex);
+    const loopSeamDistance = total / 2;
+    const seamFadeStart = Math.max(2.15, loopSeamDistance - 1.05);
+    const seamFadeEnd = Math.max(seamFadeStart + 0.42, loopSeamDistance - 0.14);
 
     cards.forEach((card, index) => {
       const distance = shortestDistance(index, state.position);
@@ -154,20 +182,48 @@ export function init() {
       const isHoverColorable = absDistance < 1.72;
       const baseScale = scaleForDistance(distance);
       const scale = baseScale;
-      const naturalOpacity = 0.36 + focus * 0.64;
-      const opacity = isActive || absDistance < 0.78
-        ? 1
-        : naturalOpacity;
+      const seamFade = smoothstep(clamp((absDistance - seamFadeStart) / (seamFadeEnd - seamFadeStart), 0, 1));
+      const opacity = (1 - seamFade) * (0.62 + focus * 0.38);
       const titleAlpha = 0.56 + focus * 0.36;
       const titleShadowAlpha = 0.16 + focus * 0.1;
       const stackOrder = Math.max(0, 10000 - Math.round(absDistance * 1000));
 
-      card.classList.toggle("is-hover-colorable", isHoverColorable);
-      card.style.setProperty("--template-title-color", `rgba(226, 232, 240, ${titleAlpha.toFixed(3)})`);
-      card.style.setProperty("--template-title-shadow-alpha", titleShadowAlpha.toFixed(3));
-      card.style.zIndex = String(stackOrder + (isActive ? 1000 : 0));
-      card.style.opacity = opacity.toFixed(3);
-      card.style.transform = `translate3d(calc(-50% + ${x.toFixed(2)}px), calc(-50% + ${y.toFixed(2)}px), ${z}px) rotateX(${rotateX}deg) rotateY(${rotateY.toFixed(2)}deg) scale(${scale.toFixed(3)})`;
+      const cached = renderState[index];
+      const nextTitleColor = `rgba(226, 232, 240, ${titleAlpha.toFixed(3)})`;
+      const nextTitleShadowAlpha = titleShadowAlpha.toFixed(3);
+      const nextZIndex = String(stackOrder + (isActive ? 1000 : 0));
+      const nextOpacity = opacity.toFixed(3);
+      const nextPointerEvents = opacity > 0.08 ? "" : "none";
+      const nextTransform = `translate3d(calc(-50% + ${x.toFixed(2)}px), calc(-50% + ${y.toFixed(2)}px), ${z}px) rotateX(${rotateX}deg) rotateY(${rotateY.toFixed(2)}deg) scale(${scale.toFixed(3)})`;
+
+      if (cached.hoverColorable !== isHoverColorable) {
+        card.classList.toggle("is-hover-colorable", isHoverColorable);
+        cached.hoverColorable = isHoverColorable;
+      }
+      if (cached.titleColor !== nextTitleColor) {
+        card.style.setProperty("--template-title-color", nextTitleColor);
+        cached.titleColor = nextTitleColor;
+      }
+      if (cached.titleShadowAlpha !== nextTitleShadowAlpha) {
+        card.style.setProperty("--template-title-shadow-alpha", nextTitleShadowAlpha);
+        cached.titleShadowAlpha = nextTitleShadowAlpha;
+      }
+      if (cached.zIndex !== nextZIndex) {
+        card.style.zIndex = nextZIndex;
+        cached.zIndex = nextZIndex;
+      }
+      if (cached.opacity !== nextOpacity) {
+        card.style.opacity = nextOpacity;
+        cached.opacity = nextOpacity;
+      }
+      if (cached.pointerEvents !== nextPointerEvents) {
+        card.style.pointerEvents = nextPointerEvents;
+        cached.pointerEvents = nextPointerEvents;
+      }
+      if (cached.transform !== nextTransform) {
+        card.style.transform = nextTransform;
+        cached.transform = nextTransform;
+      }
     });
   }
 
@@ -256,6 +312,7 @@ export function init() {
     state.dragging = false;
     state.pointerId = null;
     state.velocity = 0;
+    state.dragDirection = 0;
     viewport.classList.remove("is-dragging");
   }
 
@@ -274,6 +331,7 @@ export function init() {
     state.lastX = event.clientX;
     state.lastTime = performance.now();
     state.velocity = 0;
+    state.dragDirection = 0;
     state.moved = false;
   }
 
@@ -299,7 +357,11 @@ export function init() {
 
     const previousTarget = state.target;
     state.target = state.startTarget - (deltaX / step);
-    setAutoDirection(state.target - previousTarget);
+    const dragDelta = state.target - previousTarget;
+    setAutoDirection(dragDelta);
+    if (Math.abs(dragDelta) >= 0.001) {
+      state.dragDirection = Math.sign(dragDelta);
+    }
     state.velocity = (event.clientX - state.lastX) / deltaTime;
     state.lastX = event.clientX;
     state.lastTime = now;
@@ -318,12 +380,19 @@ export function init() {
 
     const wasMoved = state.moved;
     const velocity = state.velocity;
+    const dragShift = state.target - state.startTarget;
+    const dragDirection = Math.sign(dragShift) || state.dragDirection;
     viewport.releasePointerCapture?.(event.pointerId);
     resetPointerState();
 
     const momentum = prefersReducedMotion() || !wasMoved ? 0 : clamp(-velocity * MOMENTUM_FACTOR, -MAX_MOMENTUM_SLIDES, MAX_MOMENTUM_SLIDES);
     const weightedTarget = Math.round(state.target + momentum);
-    setAutoDirection(weightedTarget - state.position);
+    const startCenter = Math.round(state.startTarget);
+    const snapChangesTemplate = Math.round(weightedTarget) !== startCenter;
+    const releaseDirection = snapChangesTemplate
+      ? weightedTarget - state.position
+      : dragDirection || dragShift;
+    setAutoDirection(releaseDirection);
     state.target = weightedTarget;
     if (prefersReducedMotion()) renderInteractionFrame();
     else startTick();
@@ -354,9 +423,12 @@ export function init() {
   }
 
   function onResize() {
-    recalc();
-    updateCardStyles();
-    startTick();
+    if (resizeRafId) return;
+    resizeRafId = window.requestAnimationFrame(() => {
+      resizeRafId = 0;
+      if (recalc()) updateCardStyles();
+      startTick();
+    });
   }
 
   function onMotionChange() {
@@ -454,6 +526,7 @@ export function init() {
   startTick();
 
   window.addEventListener("beforeunload", () => {
+    if (resizeRafId) window.cancelAnimationFrame(resizeRafId);
     clearHoverPauseTimer();
     clearClickPauseTimer();
     stopTick();
