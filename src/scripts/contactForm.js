@@ -18,6 +18,13 @@ export function init() {
   const phoneText    = $("#phoneCodeText");
   const phoneWrap    = phoneButton?.closest(".phone-code-wrap");
   const phoneOptions = $$("[data-phone-option]");
+  const currencySelect  = $("#fcurrency");
+  const currencyButton  = $("#currencyButton");
+  const currencyList    = $("#currencyList");
+  const currencyFlag    = $("#currencyFlag");
+  const currencyText    = $("#currencyText");
+  const currencyWrap    = currencyButton?.closest(".currency-wrap");
+  const currencyOptions = $$("[data-currency-option]");
   const budgetInput  = $("#fbudget");
   const budgetError  = $("#err-budget");
   const formError    = $("#formError");
@@ -148,6 +155,90 @@ export function init() {
   });
   phoneCode?.addEventListener("change", () => syncPhonePicker());
   syncPhonePicker();
+
+  function syncCurrencyPicker(option = currencySelect?.selectedOptions?.[0]) {
+    if (!option || !currencyFlag || !currencyText) return;
+    const iso = option.dataset.iso;
+    const label = option.dataset.label || option.value;
+    const code = option.dataset.code || option.value;
+    if (iso) {
+      currencyFlag.src = `https://flagcdn.com/w40/${iso}.png`;
+      currencyFlag.srcset = `https://flagcdn.com/w40/${iso}.png 1x, https://flagcdn.com/w80/${iso}.png 2x`;
+    }
+    currencyFlag.alt = "";
+    currencyText.textContent = label;
+    currencyOptions.forEach(btn => {
+      btn.setAttribute("aria-selected", btn.dataset.code === code ? "true" : "false");
+    });
+  }
+
+  function closeCurrencyPicker() {
+    if (!currencyButton || !currencyList) return;
+    currencyButton.setAttribute("aria-expanded", "false");
+    currencyList.hidden = true;
+    currencyWrap?.classList.remove("is-open");
+  }
+
+  function openCurrencyPicker() {
+    if (!currencyButton || !currencyList) return;
+    currencyButton.setAttribute("aria-expanded", "true");
+    currencyList.hidden = false;
+    currencyWrap?.classList.add("is-open");
+    currencyList.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: "nearest" });
+  }
+
+  function toggleCurrencyPicker() {
+    if (currencyList?.hidden) openCurrencyPicker();
+    else closeCurrencyPicker();
+  }
+
+  function selectCurrencyOption(btn) {
+    if (!currencySelect || !btn) return;
+    const code = btn.dataset.code;
+    const option = Array.from(currencySelect.options).find(item => item.dataset.code === code);
+    if (!option) return;
+    Array.from(currencySelect.options).forEach(item => { item.selected = item === option; });
+    syncCurrencyPicker(option);
+    currencySelect.dispatchEvent(new Event("change", { bubbles: true }));
+    closeCurrencyPicker();
+    currencyButton?.focus();
+  }
+
+  currencyButton?.addEventListener("click", toggleCurrencyPicker);
+  currencyButton?.addEventListener("keydown", e => {
+    if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openCurrencyPicker();
+      currencyList?.querySelector('[aria-selected="true"]')?.focus();
+    }
+  });
+  currencyOptions.forEach(btn => {
+    btn.addEventListener("click", () => selectCurrencyOption(btn));
+    btn.addEventListener("keydown", e => {
+      const current = currencyOptions.indexOf(btn);
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        currencyOptions[Math.min(current + 1, currencyOptions.length - 1)]?.focus();
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        currencyOptions[Math.max(current - 1, 0)]?.focus();
+      }
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        selectCurrencyOption(btn);
+      }
+      if (e.key === "Escape") {
+        closeCurrencyPicker();
+        currencyButton?.focus();
+      }
+    });
+  });
+  document.addEventListener("click", e => {
+    if (!currencyWrap?.contains(e.target)) closeCurrencyPicker();
+  });
+  currencySelect?.addEventListener("change", () => syncCurrencyPicker());
+  syncCurrencyPicker();
 
   function showBudgetDigitError() {
     if (!budgetError || !budgetInput) return;
@@ -323,6 +414,8 @@ export function init() {
           form.reset();
           syncPhonePicker();
           closePhonePicker();
+          syncCurrencyPicker();
+          closeCurrencyPicker();
           $$(".field-invalid").forEach(el => el.classList.remove("field-invalid"));
           $$(".field-error").forEach(el => el.textContent = "");
           if (charCountEl) charCountEl.textContent = "0";

@@ -3,6 +3,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import "./core/motion.js";
 import { init as initBeforeAfter } from "./beforeAfter.js";
 import { init as initContactForm } from "./contactForm.js";
+import { init as initInteractions } from "./interactions.js";
 import { init as initNavigation } from "./navigation.js";
 import { init as initParticles } from "./particles.js";
 import { init as initPreloader } from "./preloader.js";
@@ -33,6 +34,7 @@ function markReadyWithoutPreloader() {
 }
 
 initIf("#particleCanvas", initParticles);
+initInteractions();
 
 if (has("#preloader")) {
   initPreloader({ onExit: initHeroReveal });

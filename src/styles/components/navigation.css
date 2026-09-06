@@ -60,6 +60,7 @@
 }
 
 .nav-logo:hover,
+.nav-logo.is-hovering,
 .nav-logo:focus-visible {
   background:
     radial-gradient(
@@ -82,6 +83,7 @@
 }
 
 .nav-logo:hover::after,
+.nav-logo.is-hovering::after,
 .nav-logo:focus-visible::after {
   content: none;
 }
@@ -161,6 +163,7 @@
 }
 
 .nav-cta:hover,
+.nav-cta.is-hovering,
 .nav-cta:focus-visible {
   transform: translateY(-1px);
 }

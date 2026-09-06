@@ -33,11 +33,12 @@
   z-index: 0;
   pointer-events: none;
   opacity: 0;
-  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(232, 200, 154, 0.12), transparent 56%);
+  background: radial-gradient(circle var(--cursor-spotlight-radius, 132px) at var(--mx, 50%) var(--my, 50%), rgba(255, 246, 224, 0.15), rgba(232, 200, 154, 0.1) 36%, transparent 68%);
   transition: opacity var(--ease);
 }
 
 .service-card:hover,
+.service-card.is-pointer-active,
 .service-card:focus-within {
   border-color: var(--lux-line-strong);
   box-shadow:
@@ -47,6 +48,8 @@
 }
 
 .service-card:hover::before,
+.service-card.is-pointer-active::before,
+.service-card.is-cursor-spotlit::before,
 .service-card:focus-within::before {
   opacity: 1;
 }
@@ -110,7 +113,7 @@
 .service-tag::before {
   opacity: 0;
   background:
-    radial-gradient(circle 86px at var(--mx, 50%) var(--my, 50%), rgba(255, 246, 224, 0.34), rgba(232, 200, 154, 0.16) 34%, transparent 64%);
+    radial-gradient(circle var(--cursor-spotlight-radius, 92.4px) at var(--mx, 50%) var(--my, 50%), rgba(255, 246, 224, 0.42), rgba(232, 200, 154, 0.18) 34%, transparent 66%);
   transition: opacity var(--ease-fast);
 }
 
@@ -162,7 +165,8 @@
   height: 24px;
 }
 
-.service-card:hover .service-icon {
+.service-card:hover .service-icon,
+.service-card.is-pointer-active .service-icon {
   color: var(--lux-champagne);
   background:
     linear-gradient(180deg, rgba(198, 154, 120, 0.2), rgba(198, 154, 120, 0.12)),
@@ -188,7 +192,9 @@
 }
 
 .service-card:hover .service-tag,
-.service-card:focus-within .service-tag {
+.service-card.is-pointer-active .service-tag,
+.service-card:focus-within .service-tag,
+.service-tag.is-pointer-active {
   color: #fff1cc;
   border-color: rgba(245, 219, 167, 0.58);
   background:
@@ -197,15 +203,34 @@
     0 12px 30px rgba(0, 0, 0, 0.28),
     0 0 22px rgba(232, 200, 154, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.13);
+  text-shadow:
+    0 1px 8px rgba(5, 10, 16, 0.72),
+    0 0 14px rgba(232, 200, 154, 0.18);
   transform: translateZ(30px) translateY(-1px);
 }
 
 .service-card:hover .service-tag::before,
-.service-card:focus-within .service-tag::before {
+.service-card.is-pointer-active .service-tag::before,
+.service-card:focus-within .service-tag::before,
+.service-tag.is-pointer-active::before,
+.service-tag.is-cursor-spotlit::before {
   opacity: 1;
 }
 
+.service-tag.is-cursor-spotlit {
+  border-color: rgba(245, 219, 167, 0.48);
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.26),
+    0 0 22px rgba(232, 200, 154, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.service-tag .cursor-char {
+  position: relative;
+  z-index: 1;
+}
 .service-card:hover .service-tag::after,
+.service-card.is-pointer-active .service-tag::after,
 .service-card:focus-within .service-tag::after {
   opacity: 1;
   animation: serviceTagSweep 0.78s cubic-bezier(0.22, 1, 0.36, 1);
@@ -217,14 +242,17 @@
 }
 
 .service-card.is-loaded:hover .service-tag::after,
+.service-card.is-loaded.is-pointer-active .service-tag::after,
 .service-card.is-loaded:focus-within .service-tag::after {
   opacity: 1;
   animation: serviceTagSweep 0.78s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .service-card:hover .service-title,
+.service-card.is-pointer-active .service-title,
 .service-card:focus-within .service-title,
 .service-card:hover h3,
+.service-card.is-pointer-active h3,
 .service-card:focus-within h3 {
   color: #fff3d9;
   text-shadow: 0 0 18px rgba(232, 200, 154, 0.09);
@@ -247,9 +275,17 @@
 
 .service-card:hover .service-arrow,
 .contact-link:hover .contact-link-arrow,
+.contact-link.is-hovering .contact-link-arrow,
 .contact-link:focus-visible .contact-link-arrow {
   opacity: 1;
   transform: translateX(0);
+}
+
+@media (hover: none), (pointer: coarse) {
+  .service-card::before,
+  .service-tag::before {
+    opacity: 0 !important;
+  }
 }
 
 @keyframes serviceTagLoad {

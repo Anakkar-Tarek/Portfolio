@@ -10,7 +10,7 @@ export function init() {
   if (!total) return;
 
   const SLIDE_SPEED = 0.15;
-  const HOVER_PAUSE_MS = 800;
+  const HOVER_PAUSE_MS = 1500;
   const MOMENTUM_FACTOR = 8.5;
   const MAX_MOMENTUM_SLIDES = 1.2;
   const MAX_FRAME_DELTA = 32;

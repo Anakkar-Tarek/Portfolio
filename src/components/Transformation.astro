@@ -19,15 +19,17 @@ const { before, after } = transformationResult;
           <p>The result is a stronger connection with followers, greater visibility across platforms, and a digital presence that feels consistent and alive.</p>
         </div>
 
-        <div class="ba-compare-bar" id="baCompareBar">
+        <div class="ba-compare-bar ba-showcase-row" id="baCompareBar">
           <div class="ba-compare-col ba-col-before">
             <div class="ba-c-header">
               <span class="ba-c-badge ba-c-badge--start" aria-label="Before">
                 <span class="ba-c-badge-mark" aria-hidden="true">
                   <svg class="ba-c-icon" viewBox="0 0 24 24" fill="none">
-                    <path d="M7.2 7.4A7 7 0 1 1 5.5 12" />
-                    <path d="M5.2 5.2v4.2h4.2" />
-                    <path d="M12 8.2v4.1l2.9 1.7" />
+                    <path d="M4.5 19V5" />
+                    <path d="M4.5 19h15" />
+                    <path d="M8.2 15.3h2.2" />
+                    <path d="M12 12.4h2.2" />
+                    <path d="M15.8 9.5H18" />
                   </svg>
                 </span>
                 <span class="ba-c-badge-text">
@@ -54,9 +56,10 @@ const { before, after } = transformationResult;
               <span class="ba-c-badge ba-c-badge--glow ba-c-badge-effect" aria-label="After">
                 <span class="ba-c-badge-mark" aria-hidden="true">
                   <svg class="ba-c-icon" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 3.8l2 5.2 5.2 2-5.2 2-2 5.2-2-5.2-5.2-2 5.2-2 2-5.2Z" />
-                    <path d="M18.4 4.8v3.1" />
-                    <path d="M16.9 6.35h3.1" />
+                    <path d="M4.5 19V5" />
+                    <path d="M4.5 19h15" />
+                    <path d="M7.5 14.5l3-3 3 2 4.7-6" />
+                    <path d="M15.4 7.5h2.8v2.8" />
                   </svg>
                 </span>
                 <span class="ba-c-badge-text">
@@ -84,82 +87,87 @@ const { before, after } = transformationResult;
         <div class="ba-scene" id="baScene">
           <div class="ba-glow-halo"></div>
 
-          <div class="ba-labels" id="baLabels">
-            <span class="ba-label-before">{before.period}</span>
-            <span class="ba-label-after">{after.period}</span>
-          </div>
-
-          <div class="ba-slider" id="baSlider">
-            <div class="ba-spotlight" id="baSpotlight"></div>
-
-            <img
-              src={after.image}
-              alt={after.alt}
-              class="ba-img ba-img-after"
-              id="baImgAfter"
-              width="1170"
-              height="1580"
-              draggable="false"
-            />
-
-            <img
-              src={before.image}
-              alt={before.alt}
-              class="ba-img ba-img-before"
-              id="baImgBefore"
-              width="1170"
-              height="1580"
-              draggable="false"
-            />
-
-            <div class="ba-divider" id="baDivider" aria-hidden="true">
-              <div class="ba-beam-particles"></div>
-              <div class="ba-handle" id="baHandle">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M9 18l-6-6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
-                  <path d="M15 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </div>
+          <div class="ba-stage">
+            <div class="ba-labels" id="baLabels">
+              <span class="ba-label-before">{before.period}</span>
+              <span class="ba-label-after">{after.period}</span>
             </div>
 
-            <div
-              class="ba-drag-overlay"
-              id="baDragOverlay"
-              role="slider"
-              aria-label="Adjust before and after result split"
-              aria-valuenow="50"
-              aria-valuemin="0"
-              aria-valuemax="100"
-              aria-valuetext="50% before image visible"
-              aria-describedby="baSliderInstructions"
-              tabindex="0"
-            ></div>
-          </div>
+            <div class="ba-slider" id="baSlider">
+              <div class="ba-spotlight" id="baSpotlight"></div>
 
-          <p class="sr-only" id="baSliderInstructions">
-            Use the Before and After buttons, or use Left and Right arrow keys to adjust by 3 percent, Page Up and Page Down by 10 percent, Home for the start, and End for the end.
-          </p>
-          <div class="ba-peek-controls" aria-label="Before and after views">
-            <button type="button" class="ba-peek-btn" data-ba-peek data-position="100" aria-pressed="false">
-              <span class="ba-peek-icon ba-peek-icon--before" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M7.2 7.4A7 7 0 1 1 5.5 12" />
-                  <path d="M5.2 5.2v4.2h4.2" />
-                  <path d="M12 8.2v4.1l2.9 1.7" />
-                </svg>
-              </span>
-              <span>Before</span>
-            </button>
-            <button type="button" class="ba-peek-btn" data-ba-peek data-position="0" aria-pressed="false">
-              <span class="ba-peek-icon ba-peek-icon--after" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M12 3.8l2 5.2 5.2 2-5.2 2-2 5.2-2-5.2-5.2-2 5.2-2 2-5.2Z" />
-                  <path d="M18.4 4.8v3.1" />
-                  <path d="M16.9 6.35h3.1" />
-                </svg>
-              </span>
-              <span>After</span>
-            </button>
+              <img
+                src={after.image}
+                alt={after.alt}
+                class="ba-img ba-img-after"
+                id="baImgAfter"
+                width="1170"
+                height="1214"
+                draggable="false"
+              />
+
+              <img
+                src={before.image}
+                alt={before.alt}
+                class="ba-img ba-img-before"
+                id="baImgBefore"
+                width="1170"
+                height="1214"
+                draggable="false"
+              />
+
+              <div class="ba-divider" id="baDivider" aria-hidden="true">
+                <div class="ba-beam-particles"></div>
+                <div class="ba-handle" id="baHandle">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M9 18l-6-6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M15 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </div>
+              </div>
+
+              <div
+                class="ba-drag-overlay"
+                id="baDragOverlay"
+                role="slider"
+                aria-label="Adjust before and after result split"
+                aria-valuenow="50"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuetext="50% before image visible"
+                aria-describedby="baSliderInstructions"
+                tabindex="0"
+              ></div>
+            </div>
+
+            <p class="sr-only" id="baSliderInstructions">
+              Use the Before and After buttons, or use Left and Right arrow keys to adjust by 3 percent, Page Up and Page Down by 10 percent, Home for the start, and End for the end.
+            </p>
+            <div class="ba-peek-controls" aria-label="Before and after views">
+              <button type="button" class="ba-peek-btn" data-ba-peek data-position="100" aria-pressed="false">
+                <span class="ba-peek-icon ba-peek-icon--before" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M4.5 19V5" />
+                    <path d="M4.5 19h15" />
+                    <path d="M8.2 15.3h2.2" />
+                    <path d="M12 12.4h2.2" />
+                    <path d="M15.8 9.5H18" />
+                  </svg>
+                </span>
+                <span>Before</span>
+              </button>
+              <button type="button" class="ba-peek-btn" data-ba-peek data-position="0" aria-pressed="false">
+                <span class="ba-peek-icon ba-peek-icon--after" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M4.5 19V5" />
+                    <path d="M4.5 19h15" />
+                    <path d="M7.5 14.5l3-3 3 2 4.7-6" />
+                    <path d="M15.4 7.5h2.8v2.8" />
+                  </svg>
+                </span>
+                <span>After</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

@@ -50,6 +50,7 @@
 }
 
 .stat-item {
+  overflow: hidden;
   padding: 18px 20px;
   border-radius: 8px;
   transition:
@@ -59,7 +60,25 @@
     filter var(--ease-fast);
 }
 
-.stat-item:hover {
+.stat-item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(circle var(--cursor-spotlight-radius, 140px) at var(--mx, 50%) var(--my, 50%), rgba(255, 246, 224, 0.24), rgba(232, 200, 154, 0.13) 34%, transparent 66%);
+  transition: opacity var(--ease-fast);
+}
+
+.stat-item > * {
+  position: relative;
+  z-index: 1;
+}
+
+.stat-item:hover,
+.stat-item.is-pointer-active {
   transform: translateY(-3px);
   border-color: var(--lux-line-strong);
   filter: brightness(1.03);
@@ -67,6 +86,12 @@
     var(--lux-shadow-card-hover),
     0 0 32px rgba(162, 123, 91, 0.085),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.stat-item:hover::before,
+.stat-item.is-pointer-active::before,
+.stat-item.is-cursor-spotlit::before {
+  opacity: 1;
 }
 
 .stat-num {
@@ -77,6 +102,30 @@
   font-weight: 400;
   letter-spacing: 0.01em;
   line-height: 1;
+}
+
+.stat-num .cursor-char:not(.is-cursor-lit) {
+  color: transparent;
+  background: linear-gradient(135deg, var(--lux-accent-soft) 0%, var(--lux-champagne) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.stat-num .cursor-char.is-cursor-lit {
+  background: none;
+}
+.stat-item:hover .stat-num,
+.stat-item.is-pointer-active .stat-num {
+  filter: brightness(1.08) drop-shadow(0 1px 8px rgba(5, 10, 16, 0.58));
+}
+
+.stat-item:hover .stat-label,
+.stat-item.is-pointer-active .stat-label {
+  color: #fff3d9;
+  text-shadow:
+    0 1px 8px rgba(5, 10, 16, 0.72),
+    0 0 14px rgba(232, 200, 154, 0.12);
 }
 
 .stat-label,
@@ -126,4 +175,14 @@
 .transform-body strong {
   color: var(--lux-ivory);
   font-weight: 500;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .stat-item::before {
+    opacity: 0 !important;
+  }
+
+  .cursor-char {
+    transition: none;
+  }
 }

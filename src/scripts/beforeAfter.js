@@ -18,6 +18,7 @@ export function init() {
   const compareBar = $("#baCompareBar");
   const compareCols = compareBar ? Array.from(compareBar.querySelectorAll(".ba-compare-col")) : [];
   const peekButtons = scene ? Array.from(scene.querySelectorAll("[data-ba-peek]")) : [];
+  const revealTrigger = compareBar || scene || slider;
   if (!slider || !overlay || !beforeImg || !afterImg) return;
 
   const metricEls = compareBar ? Array.from(compareBar.querySelectorAll(".ba-c-val")) : [];
@@ -253,7 +254,7 @@ export function init() {
   setPos(50, true);
 
   ScrollTrigger.create({
-    trigger: scene,
+    trigger: revealTrigger,
     start: "top 72%",
     once: true,
     onEnter: () => {

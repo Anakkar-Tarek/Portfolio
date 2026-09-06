@@ -19,6 +19,8 @@
   line-height: 1;
   letter-spacing: 0.015em;
   cursor: pointer;
+  --button-shine-peak: 0.82;
+  --button-shine-glow: 0.54;
   transition:
     transform var(--ease),
     box-shadow var(--ease),
@@ -35,7 +37,7 @@
   z-index: 0;
   border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(110deg, transparent 14%, rgba(255, 255, 255, 0.18) 34%, rgba(255, 255, 255, 0.68) 48%, rgba(255, 255, 255, 0.2) 60%, transparent 82%);
+  background: linear-gradient(110deg, transparent 14%, rgba(255, 255, 255, 0.16) 34%, rgba(255, 255, 255, var(--button-shine-glow)) 48%, rgba(255, 255, 255, 0.17) 60%, transparent 82%);
   opacity: 0;
   transform: translateX(-120%) skewX(-14deg);
 }
@@ -60,6 +62,8 @@
 
 .btn-primary,
 .nav-cta {
+  --button-shine-peak: 0.96;
+  --button-shine-glow: 0.72;
   color: #10171d;
   border-color: rgba(255, 244, 224, 0.28);
   background: linear-gradient(135deg, #d4a574 0%, var(--lux-champagne) 52%, #b88b63 100%);
@@ -71,19 +75,23 @@
 
 .btn-primary:hover,
 .nav-cta:hover,
+.btn-primary.is-hovering,
+.nav-cta.is-hovering,
 .btn-primary:focus-visible,
 .nav-cta:focus-visible {
   transform: translateY(-2px);
   box-shadow:
-    0 10px 22px rgba(0, 0, 0, 0.28),
-    0 0 12px rgba(232, 200, 154, 0.1),
+    0 13px 30px rgba(0, 0, 0, 0.31),
+    0 0 18px rgba(232, 200, 154, 0.13),
     inset 0 1px 0 rgba(255, 255, 255, 0.34);
 }
 
-.btn-primary:hover::before,
-.nav-cta:hover::before,
+.btn-primary.is-hover-animating::before,
+.nav-cta.is-hover-animating::before,
+.btn-ghost.is-hover-animating::before,
 .btn-primary:focus-visible::before,
-.nav-cta:focus-visible::before {
+.nav-cta:focus-visible::before,
+.btn-ghost:focus-visible::before {
   animation: buttonShine 0.95s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -93,7 +101,7 @@
     transform: translateX(-120%) skewX(-14deg);
   }
   18% {
-    opacity: 0.92;
+    opacity: var(--button-shine-peak);
   }
   100% {
     opacity: 0;
@@ -102,6 +110,8 @@
 }
 
 .btn-ghost {
+  --button-shine-peak: 0.68;
+  --button-shine-glow: 0.38;
   color: var(--lux-champagne);
   border-color: rgba(214, 184, 152, 0.24);
   background:
@@ -113,6 +123,7 @@
 }
 
 .btn-ghost:hover,
+.btn-ghost.is-hovering,
 .btn-ghost:focus-visible {
   color: #f4e7cd;
   border-color: rgba(232, 200, 154, 0.38);
@@ -120,10 +131,10 @@
     linear-gradient(135deg, #162734 0%, #1d3340 52%, #0d1922 100%);
   transform: translateY(-2px);
   box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.34),
-    0 0 24px rgba(128, 174, 188, 0.08),
-    0 0 18px rgba(232, 200, 154, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.075);
+    0 13px 30px rgba(0, 0, 0, 0.31),
+    0 0 18px rgba(128, 174, 188, 0.06),
+    0 0 14px rgba(232, 200, 154, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
 }
 
 .btn-full {

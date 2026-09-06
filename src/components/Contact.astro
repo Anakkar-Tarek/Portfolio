@@ -2,6 +2,9 @@
 import { currencies } from "../data/contactOptions";
 import { DEFAULT_PHONE_CODE, DEFAULT_PHONE_CODE_NAME, PHONE_CODES, flagUrl } from "../data/phoneCodes";
 import { serviceInquiryOptions } from "../data/services";
+
+const DEFAULT_CURRENCY_CODE = "USD";
+const DEFAULT_CURRENCY = currencies.find(({ code }) => code === DEFAULT_CURRENCY_CODE) ?? currencies[0];
 ---
 <section id="contact" class="lux-section lux-section--return">
   <div class="orb orb-a contact-orb"></div>
@@ -186,12 +189,73 @@ import { serviceInquiryOptions } from "../data/services";
             <label for="fbudget">Budget</label>
             <div class="field-combo budget-field-combo">
               <div class="combo-select-wrap currency-wrap">
-                <select id="fcurrency" name="currency" aria-label="Budget currency">
-                  {currencies.map(({ code, symbol }) => (
-                    <option value={code} selected={code === "USD"}>{symbol}</option>
+                <select id="fcurrency" name="currency" class="currency-native" aria-label="Budget currency">
+                  {currencies.map(({ code, label, name, flagIso }) => (
+                    <option
+                      value={code}
+                      data-code={code}
+                      data-label={label}
+                      data-name={name}
+                      data-iso={flagIso}
+                      selected={code === DEFAULT_CURRENCY.code}
+                    >
+                      {label}
+                    </option>
                   ))}
                 </select>
-                <span class="select-arrow combo-select-arrow"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                <button
+                  type="button"
+                  class="currency-button"
+                  id="currencyButton"
+                  aria-haspopup="listbox"
+                  aria-expanded="false"
+                  aria-controls="currencyList"
+                >
+                  <img
+                    id="currencyFlag"
+                    class="currency-flag"
+                    src={DEFAULT_CURRENCY.flagSrc}
+                    srcset={`${flagUrl(DEFAULT_CURRENCY.flagIso, 40)} 1x, ${flagUrl(DEFAULT_CURRENCY.flagIso, 80)} 2x`}
+                    width="24"
+                    height="18"
+                    alt=""
+                    loading="eager"
+                    decoding="async"
+                    referrerpolicy="no-referrer"
+                  />
+                  <span id="currencyText" class="currency-text">{DEFAULT_CURRENCY.label}</span>
+                </button>
+                <span class="select-arrow combo-select-arrow currency-arrow"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                <div class="currency-list" id="currencyList" role="listbox" hidden>
+                  {currencies.map(({ code, label, name, flagIso, flagSrc }) => (
+                    <button
+                      type="button"
+                      class="currency-option"
+                      data-currency-option
+                      data-code={code}
+                      data-label={label}
+                      data-name={name}
+                      data-iso={flagIso}
+                      data-flag-src={flagSrc}
+                      role="option"
+                      aria-label={`${name} ${label}`}
+                      aria-selected={code === DEFAULT_CURRENCY.code ? "true" : "false"}
+                    >
+                      <img
+                        class="currency-option-flag"
+                        src={flagSrc}
+                        srcset={`${flagUrl(flagIso, 40)} 1x, ${flagUrl(flagIso, 80)} 2x`}
+                        width="24"
+                        height="18"
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        referrerpolicy="no-referrer"
+                      />
+                      <span class="currency-option-text">{label}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
               <input
                 type="text"

@@ -1,10 +1,10 @@
 import { finePointerQuery, onReducedMotionChange, prefersReducedMotion } from "./core/motion.js";
 
 const CLEANUP_KEY = "__fbParticlesCleanup";
-const CURSOR_TRAIL_COUNT = 14;
-const CURSOR_TRAIL_RADIUS = 9;
-const TRAIL_PARTICLE_INFLUENCE = 200;
-const TRAIL_PARTICLE_FORCE = 0.036;
+const CURSOR_TRAIL_COUNT = 20;
+const CURSOR_TRAIL_RADIUS = 13;
+const TRAIL_PARTICLE_INFLUENCE = 20;
+const TRAIL_PARTICLE_FORCE = 20;
 const CURSOR_TRAIL_SUPPRESS_SELECTOR = [
   "a",
   "button",
